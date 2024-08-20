@@ -9,7 +9,6 @@ test('Name has been registered', () => {
   expect(player.name).toBeDefined();
 });
 
-
 // As a user, I want my name to be saved as a property for that game as a variable. 
 
 // As a user, I want my opponents name to be saved the same way.
@@ -22,14 +21,12 @@ test('Names for players have been saved', () => {
   expect(player2.name).toBe('Mikoz');
 });
 
-
 // As a user, I want to be notified if I try to start the game without entering a name, so that I am reminded to provide a name before the game can begin.
 
 test('No players are registered', () => {
   const player = new Person();
   expect(player.name).toBeUndefined();
 });
-
 
 // As a user, I want the current player’s name to be clearly displayed on the screen so that I always know whose turn it is. (currentPlayer).
 
