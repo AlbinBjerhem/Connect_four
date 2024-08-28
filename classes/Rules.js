@@ -46,7 +46,6 @@ export default class Rules {
           return true;
         }
       }
-      return false;
     }
 
     // Check diagonally from bottom left to top right
