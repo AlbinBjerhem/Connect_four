@@ -11,5 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "vitest": "^2.0.5"
+  },
+  "directories": {
+    "test": "test"
   }
 }
