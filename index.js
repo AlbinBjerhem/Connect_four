@@ -73,6 +73,12 @@ function startGame() {
       }
     }
 
+    // Skip "play again" prompt if the game was exited
+    if (!gameContinues && !playAgain) {
+      console.log("Thank you for playing!");
+      break; // Exit the main game loop
+    }
+
     // Ask players if they want to play again, with validation loop
     let validInput = false;
     while (!validInput) {
