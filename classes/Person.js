@@ -1,11 +1,14 @@
 export default class Person {
-    constructor(name = undefined) { 
-      this.name = name;
-      this.playerTurn = name
-    }
-    whoseTurn() {
-      // TBC
-      return this.whoseTurn
-    }
+  constructor(name, symbol) {
+    this.name = name;
+    this.symbol = symbol
   }
-  
+
+  getName() {
+    return this.name
+  }
+
+  getSymbol() {
+    return this.symbol;
+  }
+}

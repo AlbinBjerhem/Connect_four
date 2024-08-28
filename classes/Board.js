@@ -20,7 +20,7 @@ export default class Board {
   dropPiece(column, symbol) {
     // Validate column input
     if (typeof column !== 'number' || isNaN(column) || column < 0 || column >= this.columns) {
-      throw new Error('Column out of bounds.');
+      return -2;
     }
 
     // Place the piece in the lowest empty row in the selected column
@@ -45,17 +45,5 @@ export default class Board {
       }
     }
     return true; // All cells are filled
-  }
-
-  // Check if the game is a draw
-  isDraw() {
-    // The game is a draw if the board is full and there is no winner
-    return this.isBoardFull() && !this.checkWinner();
-  }
-
-  // Dummy method for checkWinner()
-  checkWinner() {
-    // Logic to check for a winner 
-    return null; // Return null or false if there is no winner
   }
 }

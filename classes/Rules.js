@@ -3,11 +3,11 @@ export default class Rules {
     this.board = board;
   }
 
-  checkForHorizontalWin(player) { 
+  checkForHorizontalWin(player) {
     for (let row = 1; row <= this.board.rows; row++) {
       let count = 0;
       for (let col = 0; col < this.board.columns; col++) {
-        if (this.board.grid[row][col] === player) {  
+        if (this.board.grid[row][col] === player) {
           count++;
           if (count === 4) return true;
         } else {
@@ -18,11 +18,11 @@ export default class Rules {
     return false;
   }
 
-  checkForVerticalWin(player) { 
+  checkForVerticalWin(player) {
     for (let col = 0; col < this.board.columns; col++) {
       let count = 0;
       for (let row = 1; row <= this.board.rows; row++) {
-        if (this.board.grid[row][col] === player) {  
+        if (this.board.grid[row][col] === player) {
           count++;
           if (count === 4) return true;
         } else {
@@ -46,6 +46,7 @@ export default class Rules {
           return true;
         }
       }
+      return false;
     }
 
     // Check diagonally from bottom left to top right
@@ -61,23 +62,16 @@ export default class Rules {
         }
       }
     }
-
     return false;
   }
 
-  checkForWin() {
-    const xWon = this.checkForHorizontalWin('X') || this.checkForVerticalWin('X') || this.checkForDiagonalWin('X');
-    const oWon = this.checkForHorizontalWin('O') || this.checkForVerticalWin('O') || this.checkForDiagonalWin('O');
+  checkForWin(symbol) {
+    const Won = this.checkForHorizontalWin(symbol) || this.checkForVerticalWin(symbol) || this.checkForDiagonalWin(symbol);
 
-    if (xWon) {
-      console.log('Player X won this game!');
-      return 'X';
-    } else if (oWon) {
-      console.log('Player O won this game!');
-      return 'O';
+    if (Won) {
+      return true;
     } else {
-      console.log('This game has come to a draw.');
-      return null;
+      return false;
     }
   }
 }
