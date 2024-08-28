@@ -1,52 +1,56 @@
-import { expect, test } from 'vitest'
-import Board from '../classes/Board.js'
+import { expect, test } from 'vitest';
+import Board from '../classes/Board.js';
 
-const board = new Board()
-
-//As a user, I can select a column between 1 and 7 to place my piece.
+// As a user, I can select a column between 1 and 7 to place my piece.
 
 test('select over the maximum column', () => {
-  board.createBoard()
+  const board = new Board(); // Create a new instance
+  board.createBoard();
   expect(() => {
-    board.dropPiece(8, 'X')
+    board.dropPiece(8, 'X');
   }).toThrowError('Column out of bounds.');
 });
 
-test('select less the the minimum column', () => {
-  board.createBoard()
+test('select less than the minimum column', () => {
+  const board = new Board();
+  board.createBoard();
   expect(() => {
-    board.dropPiece(-1, 'X')
+    board.dropPiece(-1, 'X');
   }).toThrowError('Column out of bounds.');
 });
 
-test('select a column thet does not exist', () => {
-  board.createBoard()
+test('select a column that does not exist', () => {
+  const board = new Board();
+  board.createBoard();
   expect(() => {
-    board.dropPiece('a', 'X')
-  }).toThrowError('Column out of bounds.');
+    board.dropPiece('a', 'X');
+  }).toThrowError('Column must be a number.');
 });
 
-//When placing the piece, it will always drop to the lowest empty position in the column.
+// When placing the piece, it will always drop to the lowest empty position in the column.
 
 test('drop the piece', () => {
-  board.createBoard()
-  board.dropPiece(5, 'X')
-  board.dropPiece(5, 'O')
-  expect(board.grid[6][5]).toBe('X')
-  expect(board.grid[5][5]).toBe('O')
+  const board = new Board();
+  board.createBoard();
+  board.dropPiece(5, 'X');
+  board.dropPiece(5, 'O');
+  expect(board.grid[6][5]).toBe('X');
+  expect(board.grid[5][5]).toBe('O');
 });
 
-//When marking, the correct player will be registered on the game board.
+// When marking, the correct player will be registered on the game board.
 
-test('check for the right symbole', () => {
-  board.createBoard()
-  board.dropPiece(1, 'O')
-  expect(board.grid[6][1]).toBe('O')
+test('check for the right symbol', () => {
+  const board = new Board();
+  board.createBoard();
+  board.dropPiece(1, 'O');
+  expect(board.grid[6][1]).toBe('O');
 });
 
 // Tests for isBoardFull()
 
 test('should return true if the board is full', () => {
+  const board = new Board();
   board.createBoard();
   // Fill the board
   for (let col = 0; col < board.columns; col++) {
@@ -58,6 +62,7 @@ test('should return true if the board is full', () => {
 });
 
 test('should return false if the board is not full', () => {
+  const board = new Board();
   board.createBoard();
   board.dropPiece(0, 'X'); // Only add one piece
   expect(board.isBoardFull()).toBe(false);
@@ -66,6 +71,7 @@ test('should return false if the board is not full', () => {
 // Tests for isDraw()
 
 test('should return true if the game is a draw', () => {
+  const board = new Board();
   board.createBoard();
   // Fill the board without any player winning
   for (let col = 0; col < board.columns; col++) {
@@ -77,6 +83,7 @@ test('should return true if the game is a draw', () => {
 });
 
 test('should return false if the game is not a draw', () => {
+  const board = new Board();
   board.createBoard();
   // Create a winning situation
   for (let i = 0; i < 4; i++) {

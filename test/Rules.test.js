@@ -1,11 +1,11 @@
 import { test, expect } from 'vitest';
-import Board from '../classes/Board.js'
+import Board from '../classes/Board.js';
 import Rules from '../classes/Rules.js';
 
 const playerX = 'X';
 const playerO = 'O';
 
-// Test for player X
+// Test for Player X
 test('check if player X has won horizontally', () => {
   const board = new Board(6, 7);
   board.createBoard();
@@ -170,9 +170,9 @@ test('check if the checkForWin method correctly identifies Player X as the winne
   board.dropPiece(3, playerX);
 
   const rules = new Rules(board);
-  const winner = rules.checkForWin();
+  const winner = rules.checkForWin(playerX);
 
-  expect(winner).toBe('X');  // Player X should be the winner
+  expect(winner).toBe(true);  // Player X should be the winner
 });
 
 test('check if the checkForWin method correctly identifies Player O as the winner', () => {
@@ -186,9 +186,9 @@ test('check if the checkForWin method correctly identifies Player O as the winne
   board.dropPiece(0, playerO);
 
   const rules = new Rules(board);
-  const winner = rules.checkForWin();
+  const winner = rules.checkForWin(playerO);
 
-  expect(winner).toBe('O');  // Player O should be the winner
+  expect(winner).toBe(true);  // Player O should be the winner
 });
 
 test('check if the checkForWin method returns null when there is no winner', () => {
@@ -200,7 +200,7 @@ test('check if the checkForWin method returns null when there is no winner', () 
   board.dropPiece(1, playerO);
 
   const rules = new Rules(board);
-  const winner = rules.checkForWin();
+  const winner = rules.checkForWin(playerX);
 
-  expect(winner).toBe(null);  // No player should be the winner
+  expect(winner).toBe(false);  // No player should be the winner
 });

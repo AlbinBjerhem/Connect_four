@@ -74,7 +74,3 @@ export default class Rules {
     }
   }
 }
-
-
-
-
