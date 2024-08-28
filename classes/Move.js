@@ -16,10 +16,6 @@ export default class Move {
 
     const row = this.board.dropPiece(column, symbol);
 
-    if (row === -2) {
-      return 'Column out of bounds.';
-    }
-
     if (row === -1) {
       return 'Column is full, choose another column';
     }

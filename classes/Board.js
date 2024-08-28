@@ -18,11 +18,6 @@ export default class Board {
   }
 
   dropPiece(column, symbol) {
-    // Validate column input
-    if (typeof column !== 'number' || isNaN(column) || column < 0 || column >= this.columns) {
-      return -2;
-    }
-
     // Place the piece in the lowest empty row in the selected column
     for (let row = this.rows; row >= 1; row--) {
       if (this.grid[row][column] === ' ') {
