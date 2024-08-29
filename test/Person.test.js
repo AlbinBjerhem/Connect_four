@@ -4,7 +4,7 @@ import Person from '../classes/Person.js'
 // As a user, I want to be able to register my name before the game starts. The game should confirm that my name has been successfully registered.
 
 test('Name has been registered', () => {
-    // Temporary code, replace with actual code after function has been implemented.
+  // Temporary code, replace with actual code after function has been implemented.
   const player = new Person('Chalil');
   expect(player.name).toBeDefined();
 });
@@ -33,7 +33,7 @@ test('No players are registered', () => {
 test('Current player name is displayed', () => {
   const player = new Person('Albin');
   const currentPlayer = player;
-  
+
   expect(currentPlayer).toBe(player);
   expect(player.name).toBe('Albin');
 });
@@ -46,7 +46,7 @@ test('Current player name is displayed', () => {
 test('Winners name is displayed', () => {
   const player = new Person('Sebbe');
   const displayWinner = player;
-  
+
   expect(displayWinner).toBe(player);
   expect(player.name).toBe('Sebbe');
 });

@@ -4,99 +4,120 @@ import promptSync from 'prompt-sync';
 
 const prompt = promptSync();
 
-function startGame() {
-  // Ask for player names
-  const player1Name = prompt("Enter name for Player 1: ");
-  const player2Name = prompt("Enter name for Player 2: ");
+class Game {
+  constructor() {
+    this.player1 = null;
+    this.player2 = null;
+    this.currentPlayer = null;
+    this.playAgain = true;
+  }
 
-  // Create player instances with the provided names and symbols
-  const player1 = new Person(player1Name, 'X');
-  const player2 = new Person(player2Name, 'O');
+  // Method to start the game
+  start() {
+    this.setupPlayers();
+    while (this.playAgain) {
+      this.playGame();
+      this.askToPlayAgain();
+    }
+    console.log("Thank you for playing!");
+  }
 
-  let playAgain = true; // Variable to control if the game should start again
+  // Method to setup the players
+  setupPlayers() {
+    this.player1 = new Person(prompt("Enter name for Player 1 (X): "), 'X');
+    this.player2 = new Person(prompt("Enter name for Player 2 (O): "), 'O');
+    this.currentPlayer = this.player1;
+  }
 
-  // Game loop to handle replay
-  while (playAgain) {
-    // Initialize the game
+  // Method to handle the game logic
+  playGame() {
     const move = new Move();
-    let currentPlayer = player1;
     let gameContinues = true;
 
-    // Start the game loop
     while (gameContinues) {
-      console.log("Current Board:");
+      //      console.clear();
+      console.log("Current Board: ");
       move.board.showBoard();
 
       let moveResult;
-
-      // Loop to handle invalid input, full column, and out-of-bounds cases
       do {
-        // Get player input
-        const columnInput = prompt(`${currentPlayer.name}'s turn. Choose a column (1-${move.board.columns}) or type 'exit' to quit: `);
-
-        // Check if the user wants to exit
-        if (columnInput === null || columnInput.toLowerCase() === 'exit') {
-          console.log("Game terminated by the user.");
+        moveResult = this.makeOneMove(move);
+        if (moveResult === 'exit') {
           gameContinues = false;
-          playAgain = false; // Stop asking to play again
+          this.playAgain = false;
           break;
         }
-
-        // Convert input to a number and check if it's valid
-        const column = parseInt(columnInput) - 1;
-
-        if (isNaN(column) || column < 0 || column >= move.board.columns) {
-          console.log('Invalid input. Column is out of bounds, choose another column.');
-          moveResult = 'Invalid input'; // Set result to keep the loop going
-        } else {
-          // Make a move using the player's symbol
-          moveResult = move.makeMove(column, currentPlayer.symbol, currentPlayer.name);
-
-          if (moveResult === 'Column is full, choose another column') {
-            console.log(moveResult);  // Inform the player that the column is full
-          }
-        }
-
       } while (moveResult === 'Column is full, choose another column' || moveResult === 'Invalid input');
 
       if (!gameContinues) break;
 
       console.log(moveResult);
 
-      // Check if the game is over
       if (moveResult.includes('wins!') || moveResult.includes('Game over')) {
         gameContinues = false;
-        move.board.showBoard(); // Show the final board state
+        move.board.showBoard();
       } else {
-        // Switch to the other player
-        currentPlayer = currentPlayer === player1 ? player2 : player1;
+        this.switchPlayer();
       }
     }
+  }
 
-    // Skip "play again" prompt if the game was exited
-    if (!gameContinues && !playAgain) {
-      console.log("Thank you for playing!");
-      break; // Exit the main game loop
+  // Method to handle player move
+  makeOneMove(move) {
+    const columnInput = prompt(`${this.currentPlayer.name}'s turn. Choose a column (1-${move.board.columns}) or type 'exit' to quit: `);
+
+    if (columnInput === null || columnInput === undefined || columnInput.toLowerCase() === 'exit') {
+      console.log("Game terminated by the user.");
+      return 'exit';
     }
 
-    // Ask players if they want to play again, with validation loop
+    const column = parseInt(columnInput) - 1;
+    if (isNaN(column) || column < 0 || column >= move.board.columns) {
+      console.log('Invalid input. Column is out of bounds, choose another column.');
+      return 'Invalid input';
+    }
+
+    const moveResult = move.makeMove(column, this.currentPlayer.symbol, this.currentPlayer.name);
+
+    if (moveResult === 'Column is full, choose another column') {
+      console.log(moveResult);
+    }
+
+    return moveResult;
+  }
+
+  // Method to switch the current player
+  switchPlayer() {
+    this.currentPlayer = this.currentPlayer === this.player1 ? this.player2 : this.player1;
+  }
+
+  // Method to ask if players want to play again
+  askToPlayAgain() {
     let validInput = false;
     while (!validInput) {
-      const playAgainInput = prompt("Do you want to play again? (yes/no): ").toLowerCase();
+      const playAgainInput = prompt("Do you want to play again? (yes/no): ");
 
-      if (playAgainInput === 'yes') {
-        playAgain = true; // Continue the game
-        validInput = true;
-      } else if (playAgainInput === 'no') {
-        playAgain = false; // Exit the game loop
-        validInput = true;
-        console.log("Thank you for playing!");
+      if (playAgainInput === null || playAgainInput === undefined || typeof playAgainInput !== 'string') {
+        console.log("Invalid input. Please enter yes or no.");
       } else {
-        console.log("Invalid input. Please enter 'yes' or 'no'.");
+        switch (playAgainInput.toLowerCase()) {
+          case 'yes':
+            this.playAgain = true;
+            validInput = true;
+            break;
+          case 'no':
+            this.playAgain = false;
+            validInput = true;
+            break; // Add break here to prevent fall-through
+          default:
+            console.log("Invalid input. Please enter yes or no.");
+            break;
+        }
       }
     }
   }
 }
 
 // Start the game
-startGame();
+const game = new Game();
+game.start();

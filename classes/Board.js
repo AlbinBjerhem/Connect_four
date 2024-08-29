@@ -15,6 +15,7 @@ export default class Board {
   showBoard() {
     // Log each row of the grid to the console
     this.grid.forEach(row => console.log(row.join(' | ')));
+    console.log('-'.repeat(this.columns * 4 - 2));
   }
 
   dropPiece(column, symbol) {
