@@ -13,9 +13,24 @@ export default class Board {
   }
 
   showBoard() {
-    // Log each row of the grid to the console
-    this.grid.forEach(row => console.log(row.join(' | ')));
-    console.log('-'.repeat(this.columns * 4 - 2));
+    // Draw the top border
+    console.log('╔' + '═══╦'.repeat(this.columns - 1) + '═══╗');
+
+    // Draw the grid rows
+    this.grid.forEach((row, index) => {
+      console.log('║ ' + row.map(cell => cell === ' ' ? ' ' : cell).join(' ║ ') + ' ║');
+
+      if (index === 0) {
+        // Draw separator line below column numbers
+        console.log('╠' + '═══╬'.repeat(this.columns - 1) + '═══╣');
+      } else if (index < this.rows) {
+        // Draw separator lines between grid rows
+        console.log('╠' + '───┼'.repeat(this.columns - 1) + '───╣');
+      }
+    });
+
+    // Draw the bottom border
+    console.log('╚' + '═══╩'.repeat(this.columns - 1) + '═══╝');
   }
 
   dropPiece(column, symbol) {
@@ -38,7 +53,6 @@ export default class Board {
     return -1;
   }
 
-  // Check if the board is full
   isBoardFull() {
     // Check if any cell is empty
     for (let row = 1; row <= this.rows; row++) {
@@ -51,16 +65,13 @@ export default class Board {
     return true; // All cells are filled
   }
 
-  // Check if the game is a draw
   isDraw() {
     // The game is a draw if the board is full and there is no winner
     return this.isBoardFull() && !this.checkWinner();
   }
 
-  // Dummy method for checkWinner()
   checkWinner() {
     // Logic to check for a winner 
     return null; // Return null or false if there is no winner
   }
 }
-
