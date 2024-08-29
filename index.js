@@ -35,7 +35,7 @@ class Game {
     let gameContinues = true;
 
     while (gameContinues) {
-      //      console.clear();
+      console.clear();
       console.log("Current Board: ");
       move.board.showBoard();
 
