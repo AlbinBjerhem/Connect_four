@@ -1,0 +1,19 @@
+{
+  "name": "connect_four",
+  "version": "1.0.0",
+  "description": "First",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "prompt-sync": "^4.2.0",
+    "vitest": "^2.0.5"
+  },
+  "directories": {
+    "test": "test"
+  }
+}
