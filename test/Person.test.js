@@ -4,7 +4,6 @@ import Person from '../classes/Person.js'
 // As a user, I want to be able to register my name before the game starts. The game should confirm that my name has been successfully registered.
 
 test('Name has been registered', () => {
-  // Temporary code, replace with actual code after function has been implemented.
   const player = new Person('Chalil');
   expect(player.name).toBeDefined();
 });

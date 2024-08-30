@@ -1,6 +1,7 @@
 import Person from './classes/Person.js';
 import Move from './classes/Move.js';
 import promptSync from 'prompt-sync';
+export { Game };
 
 const prompt = promptSync();
 
