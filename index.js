@@ -1,123 +1,64 @@
-import Person from './classes/Person.js';
-import Move from './classes/Move.js';
-import promptSync from 'prompt-sync';
+import Board from "./classes/Board.js"
+import Player from "./classes/Player.js"
+import Rules from "./classes/Rules.js"
 
-const prompt = promptSync();
 
 class Game {
   constructor() {
+    this.board = new Board();
+    this.rules = new Rules();
     this.player1 = null;
     this.player2 = null;
     this.currentPlayer = null;
-    this.playAgain = true;
+    this.gameOver = false;
+
+    document.getElementById('startGame').addEventListener('click', () => this.start());
+    this.board.canvas.addEventListener('click', (e) => this.handleMove(e));
   }
 
-  // Method to start the game
   start() {
-    this.setupPlayers();
-    while (this.playAgain) {
-      this.playGame();
-      this.askToPlayAgain();
-    }
-    console.log("Thank you for playing!");
-  }
-
-  // Method to setup the players
-  setupPlayers() {
-    this.player1 = new Person(prompt("Enter name for Player 1 (X): "), 'X');
-    this.player2 = new Person(prompt("Enter name for Player 2 (O): "), 'O');
+    const player1Name = document.getElementById('player1Name').value || 'Player 1';
+    const player2Name = document.getElementById('player2Name').value || 'Player 2';
+    this.player1 = new Player(player1Name, 'red');
+    this.player2 = new Player(player2Name, 'blue');
     this.currentPlayer = this.player1;
+    this.board.grid = Array.from({ length: this.board.rows }, () => Array(this.board.columns).fill(null));
+    this.board.drawBoard();
+    this.updateStatus(`${this.currentPlayer.name}'s turn`);
+    this.gameOver = false;
   }
 
-  // Method to handle the game logic
-  playGame() {
-    const move = new Move();
-    let gameContinues = true;
+  handleMove(event) {
+    if (this.gameOver) return;
 
-    while (gameContinues) {
-      console.clear();
-      console.log("Current Board: ");
-      move.board.showBoard();
+    const x = event.offsetX;
+    const col = Math.floor(x / this.board.cellSize);
+    const row = this.board.dropPiece(col, this.currentPlayer.color);
 
-      let moveResult;
-      do {
-        moveResult = this.makeOneMove(move);
-        if (moveResult === 'exit') {
-          gameContinues = false;
-          this.playAgain = false;
-          break;
-        }
-      } while (moveResult === 'Column is full, choose another column' || moveResult === 'Invalid input');
-
-      if (!gameContinues) break;
-
-      console.log(moveResult);
-
-      if (moveResult.includes('wins!') || moveResult.includes('Game over')) {
-        gameContinues = false;
-        move.board.showBoard();
-      } else {
-        this.switchPlayer();
+    if (row !== -1) {
+      this.board.drawBoard();
+      if (this.rules.checkWin(row, col, this.currentPlayer.color)) {
+        this.updateStatus(`${this.currentPlayer.name} wins!`);
+        this.gameOver = true;
+        return;
       }
-    }
-  }
 
-  // Method to handle player move
-  makeOneMove(move) {
-    const columnInput = prompt(`${this.currentPlayer.name}'s turn. Choose a column (1-${move.board.columns}) or type 'exit' to quit: `);
-
-    if (columnInput === null || columnInput === undefined || columnInput.toLowerCase() === 'exit') {
-      console.log("Game terminated by the user.");
-      return 'exit';
-    }
-
-    const column = parseInt(columnInput) - 1;
-    if (isNaN(column) || column < 0 || column >= move.board.columns) {
-      console.log('Invalid input. Column is out of bounds, choose another column.');
-      return 'Invalid input';
-    }
-
-    const moveResult = move.makeMove(column, this.currentPlayer.symbol, this.currentPlayer.name);
-
-    if (moveResult === 'Column is full, choose another column') {
-      console.log(moveResult);
-    }
-
-    return moveResult;
-  }
-
-  // Method to switch the current player
-  switchPlayer() {
-    this.currentPlayer = this.currentPlayer === this.player1 ? this.player2 : this.player1;
-  }
-
-  // Method to ask if players want to play again
-  askToPlayAgain() {
-    let validInput = false;
-    while (!validInput) {
-      const playAgainInput = prompt("Do you want to play again? (yes/no): ");
-
-      if (playAgainInput === null || playAgainInput === undefined || typeof playAgainInput !== 'string') {
-        console.log("Invalid input. Please enter yes or no.");
-      } else {
-        switch (playAgainInput.toLowerCase()) {
-          case 'yes':
-            this.playAgain = true;
-            validInput = true;
-            break;
-          case 'no':
-            this.playAgain = false;
-            validInput = true;
-            break; // Add break here to prevent fall-through
-          default:
-            console.log("Invalid input. Please enter yes or no.");
-            break;
-        }
+      if (this.board.isFull()) {
+        this.updateStatus('Game over! It\'s a draw.');
+        this.gameOver = true;
+        return;
       }
+
+      this.currentPlayer = this.currentPlayer === this.player1 ? this.player2 : this.player1;
+      this.updateStatus(`${this.currentPlayer.name}'s turn`);
     }
+  }
+
+  updateStatus(message) {
+    document.getElementById('status').textContent = message;
   }
 }
 
-// Start the game
-const game = new Game();
-game.start();
+document.addEventListener('DOMContentLoaded', () => {
+  new Game();
+});

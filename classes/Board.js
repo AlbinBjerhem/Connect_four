@@ -1,77 +1,44 @@
 export default class Board {
-  constructor(rows = 6, columns = 7) {
+  constructor(rows = 6, columns = 7, cellSize = 100) {
     this.rows = rows;
     this.columns = columns;
+    this.cellSize = cellSize;
+    this.grid = Array.from({ length: rows }, () => Array(columns).fill(null));
+    this.canvas = document.getElementById('board');
+    this.ctx = this.canvas.getContext('2d');
+    this.canvas.width = this.columns * this.cellSize;
+    this.canvas.height = this.rows * this.cellSize;
   }
 
-  createBoard() {
-    // Create column number labels
-    const columnNumbers = Array.from({ length: this.columns }, (_, i) => (i + 1).toString());
-
-    // Create the grid with an extra row at the top for the column numbers
-    this.grid = [columnNumbers, ...Array.from({ length: this.rows }, () => Array(this.columns).fill(' '))];
-  }
-
-  showBoard() {
-    // Draw the top border
-    console.log('╔' + '═══╦'.repeat(this.columns - 1) + '═══╗');
-
-    // Draw the grid rows
-    this.grid.forEach((row, index) => {
-      console.log('║ ' + row.map(cell => cell === ' ' ? ' ' : cell).join(' ║ ') + ' ║');
-
-      if (index === 0) {
-        // Draw separator line below column numbers
-        console.log('╠' + '═══╬'.repeat(this.columns - 1) + '═══╣');
-      } else if (index < this.rows) {
-        // Draw separator lines between grid rows
-        console.log('╠' + '───┼'.repeat(this.columns - 1) + '───╣');
-      }
-    });
-
-    // Draw the bottom border
-    console.log('╚' + '═══╩'.repeat(this.columns - 1) + '═══╝');
-  }
-
-  dropPiece(column, symbol) {
-    // Validate column input
-    if (typeof column !== 'number') {
-      throw new Error('Column must be a number.');
-    }
-    if (column < 0 || column >= this.columns) {
-      throw new Error('Column out of bounds.');
-    }
-
-    // Place the piece in the lowest empty row in the selected column
-    for (let row = this.rows; row >= 1; row--) {
-      if (this.grid[row][column] === ' ') {
-        this.grid[row][column] = symbol;
-        return row;
+  drawBoard() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.columns; c++) {
+        this.drawCell(r, c, this.grid[r][c]);
       }
     }
-    // If the column is full, return -1
+  }
+
+  drawCell(row, col, color) {
+    this.ctx.fillStyle = color || 'white';
+    this.ctx.strokeStyle = 'black';
+    this.ctx.beginPath();
+    this.ctx.arc(col * this.cellSize + this.cellSize / 2, row * this.cellSize + this.cellSize / 2, this.cellSize / 2 - 10, 0, 2 * Math.PI);
+    this.ctx.fill();
+    this.ctx.stroke();
+  }
+
+  dropPiece(col, color) {
+    for (let r = this.rows - 1; r >= 0; r--) {
+      if (!this.grid[r][col]) {
+        this.grid[r][col] = color;
+        return r;
+      }
+    }
     return -1;
   }
 
-  isBoardFull() {
-    // Check if any cell is empty
-    for (let row = 1; row <= this.rows; row++) {
-      for (let col = 0; col < this.columns; col++) {
-        if (this.grid[row][col] === ' ') {
-          return false; // There is an empty cell, the board is not full
-        }
-      }
-    }
-    return true; // All cells are filled
-  }
-
-  isDraw() {
-    // The game is a draw if the board is full and there is no winner
-    return this.isBoardFull() && !this.checkWinner();
-  }
-
-  checkWinner() {
-    // Logic to check for a winner 
-    return null; // Return null or false if there is no winner
+  isFull() {
+    return this.grid.every(row => row.every(cell => cell !== null));
   }
 }
