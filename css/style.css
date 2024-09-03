@@ -1,34 +1,97 @@
+/* Importera de valda fonterna */
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
+
+/* Grundläggande stilmallar för kroppen */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Ubuntu', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f0f0f0;
+  color: rgb(30, 30, 30);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  margin: 0;
-  background-color: #f4f4f4;
 }
 
-#game {
-  text-align: center;
-}
-
-#header {
+h1 {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 2.5em;
   margin-bottom: 20px;
 }
 
-#boardContainer {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
+.player-info {
+  margin-bottom: 20px;
+  text-align: center;
+  font-family: 'Ubuntu', sans-serif;
 }
 
-canvas {
-  border: 1px solid #333;
-  background-color: #fff;
+input {
+  margin-bottom: 10px;
+  padding: 8px;
+  font-size: 1em;
+  font-family: 'Ubuntu', sans-serif;
+  border: 2px solid #333;
+  border-radius: 5px;
+  width: 100%;
+  max-width: 200px;
+}
+
+button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  font-size: 1em;
+  color: #fff;
+  background-color: #333;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Ubuntu', sans-serif;
+}
+
+button:hover {
+  background-color: #555;
+}
+
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(7, 50px);
+  grid-gap: 5px;
+  background-color: rgb(30, 30, 30);
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.cell {
+  width: 50px;
+  height: 50px;
+  background-color: #f0f0f0; /* Tomma celler ska ha samma färg som bakgrunden */
+  border: 2px solid #333;
+  border-radius: 50%;
+}
+
+.player1 {
+  background-color: red;
+}
+
+.player2 {
+  background-color: yellow;
 }
 
 #status {
-  margin-top: 20px;
   font-weight: bold;
   font-size: 1.2em;
+  margin-top: 10px;
+}
+
+#replay-game {
+  margin-top: 10px;
 }
