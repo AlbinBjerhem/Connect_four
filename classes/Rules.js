@@ -1,24 +1,38 @@
-export default class Rules {
-  constructor() {
-  }
+export class Rules {
+  static checkWin(board, player, row, col) {
+    const directions = [
+      { r: 0, c: 1 }, { r: 1, c: 0 }, { r: 1, c: 1 }, { r: 1, c: -1 }
+    ];
 
-  checkWin(row, col, color) {
-    return this.checkDirection(row, col, color, 1, 0) || // Horizontal
-      this.checkDirection(row, col, color, 0, 1) || // Vertical
-      this.checkDirection(row, col, color, 1, 1) || // Diagonal right down
-      this.checkDirection(row, col, color, 1, -1);  // Diagonal right up
-  }
+    for (let { r: dr, c: dc } of directions) {
+      let count = 1;
 
-  checkDirection(row, col, color, rowDir, colDir) {
-    let count = 0;
-    for (let r = row - 3 * rowDir, c = col - 3 * colDir; r <= row + 3 * rowDir && c <= col + 3 * colDir; r += rowDir, c += colDir) {
-      if (r >= 0 && r < this.board.rows && c >= 0 && c < this.board.columns && this.board.grid[r]?.[c] === color) {
-        count++;
-        if (count === 4) return true;
-      } else {
-        count = 0;
+      for (let i = 1; i < 4; i++) {
+        const r = row + dr * i;
+        const c = col + dc * i;
+        if (r >= 0 && r < board.rows && c >= 0 && c < board.cols && board.grid[r][c] === player) {
+          count++;
+        } else {
+          break;
+        }
       }
+
+      for (let i = 1; i < 4; i++) {
+        const r = row - dr * i;
+        const c = col - dc * i;
+        if (r >= 0 && r < board.rows && c >= 0 && c < board.cols && board.grid[r][c] === player) {
+          count++;
+        } else {
+          break;
+        }
+      }
+
+      if (count >= 4) return true;
     }
     return false;
+  }
+
+  static checkDraw(board) {
+    return board.isFull();
   }
 }

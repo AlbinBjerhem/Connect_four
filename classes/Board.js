@@ -1,44 +1,29 @@
-export default class Board {
-  constructor(rows = 6, columns = 7, cellSize = 100) {
+export class Board {
+  constructor(rows = 6, cols = 7) {
     this.rows = rows;
-    this.columns = columns;
-    this.cellSize = cellSize;
-    this.grid = Array.from({ length: rows }, () => Array(columns).fill(null));
-    this.canvas = document.getElementById('board');
-    this.ctx = this.canvas.getContext('2d');
-    this.canvas.width = this.columns * this.cellSize;
-    this.canvas.height = this.rows * this.cellSize;
+    this.cols = cols;
+    this.grid = Array.from({ length: rows }, () => Array(cols).fill(null));
   }
 
-  drawBoard() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    for (let r = 0; r < this.rows; r++) {
-      for (let c = 0; c < this.columns; c++) {
-        this.drawCell(r, c, this.grid[r][c]);
+  isColumnFull(col) {
+    return this.grid[0][col] !== null;
+  }
+
+  placePiece(col, player) {
+    for (let row = this.rows - 1; row >= 0; row--) {
+      if (this.grid[row][col] === null) {
+        this.grid[row][col] = player;
+        return { row, col };
       }
     }
-  }
-
-  drawCell(row, col, color) {
-    this.ctx.fillStyle = color || 'white';
-    this.ctx.strokeStyle = 'black';
-    this.ctx.beginPath();
-    this.ctx.arc(col * this.cellSize + this.cellSize / 2, row * this.cellSize + this.cellSize / 2, this.cellSize / 2 - 10, 0, 2 * Math.PI);
-    this.ctx.fill();
-    this.ctx.stroke();
-  }
-
-  dropPiece(col, color) {
-    for (let r = this.rows - 1; r >= 0; r--) {
-      if (!this.grid[r][col]) {
-        this.grid[r][col] = color;
-        return r;
-      }
-    }
-    return -1;
+    return null;
   }
 
   isFull() {
-    return this.grid.every(row => row.every(cell => cell !== null));
+    return this.grid[0].every(cell => cell !== null);
+  }
+
+  reset() {
+    this.grid = Array.from({ length: this.rows }, () => Array(this.cols).fill(null));
   }
 }
