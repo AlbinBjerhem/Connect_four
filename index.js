@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const player2Input = document.getElementById("player2");
   const startButton = document.getElementById("start-game");
   const replayButton = document.getElementById("replay-game");
+  const backButton = document.getElementById("back-to-start");
   const statusDisplay = document.getElementById("status");
   const boardElement = document.getElementById("board");
 
@@ -19,6 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   startButton.addEventListener("click", startGame);
   replayButton.addEventListener("click", resetGame);
+  backButton.addEventListener("click", backToStart);
 
   function startGame() {
     board = new Board();
@@ -27,6 +29,14 @@ document.addEventListener("DOMContentLoaded", function () {
     currentPlayer = player1;
     gameActive = true;
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
+
+    player1Input.style.display = "none";
+    player2Input.style.display = "none";
+    document.getElementById("labelPlayer1").style.display = "none";
+    document.getElementById("labelPlayer2").style.display = "none";
+    startButton.style.display = "none";
+
+    backButton.style.display = "block"; 
 
     boardElement.innerHTML = '';
     for (let r = 0; r < board.rows; r++) {
@@ -57,11 +67,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (Rules.checkWin(board, currentPlayer.name, row, placedCol)) {
       statusDisplay.textContent = `${currentPlayer.name} wins!`;
       gameActive = false;
-      replayButton.style.display = "block";
+      replayButton.style.display = "block"; 
+      backButton.style.display = "none";
     } else if (Rules.checkDraw(board)) {
       statusDisplay.textContent = "It's a draw!";
       gameActive = false;
-      replayButton.style.display = "block";
+      replayButton.style.display = "block"; 
+      backButton.style.display = "none";
     } else {
       currentPlayer = currentPlayer === player1 ? player2 : player1;
       statusDisplay.textContent = `${currentPlayer.name}'s turn`;
@@ -69,7 +81,46 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function resetGame() {
-    startGame();
+    board = new Board();
+    currentPlayer = player1;
+    gameActive = true;
+    statusDisplay.textContent = `${currentPlayer.name}'s turn`;
+
+    player1Input.style.display = "none";
+    player2Input.style.display = "none";
+    document.getElementById("labelPlayer1").style.display = "none";
+    document.getElementById("labelPlayer2").style.display = "none";
+    startButton.style.display = "none";
+
+    replayButton.style.display = "none"; 
+
+    backButton.style.display = "block"; 
+
+    // Restore Board
+    boardElement.innerHTML = '';
+    for (let r = 0; r < board.rows; r++) {
+        for (let c = 0; c < board.cols; c++) {
+            const cell = document.createElement("div");
+            cell.classList.add("cell");
+            cell.dataset.row = r;
+            cell.dataset.col = c;
+            cell.addEventListener("click", handleMove);
+            boardElement.appendChild(cell);
+        }
+    }
+  }
+
+  function backToStart() {
+    // Restore game function
+    boardElement.innerHTML = ''; 
+    statusDisplay.textContent = ''; 
+    backButton.style.display = "none"; 
     replayButton.style.display = "none";
+
+    player1Input.style.display = "block";
+    player2Input.style.display = "block";
+    document.getElementById("labelPlayer1").style.display = "block";
+    document.getElementById("labelPlayer2").style.display = "block";
+    startButton.style.display = "block";
   }
 });
