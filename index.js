@@ -6,10 +6,12 @@ import { Rules } from './classes/Rules.js';
 document.addEventListener("DOMContentLoaded", function () {
   const playGameButton = document.getElementById("play-game");
   const replayButton = document.getElementById("replay-game");
+  const resetButton = document.getElementById("reset-game");
+  const quitButton = document.getElementById("quit-game");
   const statusDisplay = document.getElementById("status");
   const boardElement = document.getElementById("board");
 
-  let board = new Board(); 
+  let board = new Board();
   let player1;
   let player2;
   let currentPlayer;
@@ -18,15 +20,29 @@ document.addEventListener("DOMContentLoaded", function () {
   renderBoard();
 
   playGameButton.addEventListener("click", function () {
-    
+
     player1 = new Person(prompt("Enter Player 1 Name:") || "Player 1");
     player2 = new Person(prompt("Enter Player 2 Name:") || "Player 2");
 
     playGameButton.style.display = "none";
+    resetButton.style.display = "block";
+    quitButton.style.display = "block";
+
     startGame();
   });
 
   replayButton.addEventListener("click", resetGame);
+
+  resetButton.addEventListener("click", resetGame)
+
+  quitButton.addEventListener("click", function () {
+    renderBoard()
+    playGameButton.style.display = "block";
+    resetButton.style.display = "none";
+    quitButton.style.display = "none";
+    player1 = ''
+    player2 = ''
+  })
 
   function renderBoard() {
     boardElement.innerHTML = '';
@@ -102,9 +118,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const cell = document.querySelector(`.cell[data-row='${availableRow}'][data-col='${col}']`);
 
       if (currentPlayer === player1) {
-        cell.classList.add("hover-player1"); 
+        cell.classList.add("hover-player1");
       } else {
-        cell.classList.add("hover-player2"); 
+        cell.classList.add("hover-player2");
       }
     }
   }
@@ -113,13 +129,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!gameActive) return;
 
     const col = parseInt(event.target.dataset.col);
-    
+
     // To find first available row in column
     const availableRow = findAvailableRow(col);
 
     if (availableRow !== null) {
       const cell = document.querySelector(`.cell[data-row='${availableRow}'][data-col='${col}']`);
-      cell.classList.remove("hover-player1", "hover-player2"); 
+      cell.classList.remove("hover-player1", "hover-player2");
     }
   }
 
