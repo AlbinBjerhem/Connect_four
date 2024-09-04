@@ -45,6 +45,10 @@ document.addEventListener("DOMContentLoaded", function () {
         cell.classList.add("cell");
         cell.dataset.row = r;
         cell.dataset.col = c;
+
+        cell.addEventListener("mouseover", handleHover);
+        cell.addEventListener("mouseout", removeHover);
+
         cell.addEventListener("click", handleMove);
         boardElement.appendChild(cell);
       }
@@ -62,7 +66,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const { row, col: placedCol } = board.placePiece(move.column, move.player.name);
 
     const cell = document.querySelector(`.cell[data-row='${row}'][data-col='${placedCol}']`);
+
+    cell.classList.remove("hover-player1");
+    cell.classList.remove("hover-player2");
+
     cell.classList.add(currentPlayer === player1 ? "player1" : "player2");
+
+    removeHover(event);
 
     if (Rules.checkWin(board, currentPlayer.name, row, placedCol)) {
       statusDisplay.textContent = `${currentPlayer.name} wins!`;
@@ -78,6 +88,48 @@ document.addEventListener("DOMContentLoaded", function () {
       currentPlayer = currentPlayer === player1 ? player2 : player1;
       statusDisplay.textContent = `${currentPlayer.name}'s turn`;
     }
+  }
+
+  function handleHover(event) {
+    if (!gameActive) return;
+
+    const col = parseInt(event.target.dataset.col);
+
+    const availableRow = findAvailableRow(col);
+
+    if (availableRow !== null) {
+        const cell = document.querySelector(`.cell[data-row='${availableRow}'][data-col='${col}']`);
+
+        if (currentPlayer === player1) {
+            cell.classList.add("hover-player1"); 
+        } else {
+            cell.classList.add("hover-player2"); 
+        }
+    }
+  }
+
+  function removeHover(event) {
+    if (!gameActive) return;
+
+    const col = parseInt(event.target.dataset.col);
+
+    // To find first available row in column
+    const availableRow = findAvailableRow(col);
+
+    if (availableRow !== null) {
+        const cell = document.querySelector(`.cell[data-row='${availableRow}'][data-col='${col}']`);
+        cell.classList.remove("hover-player1");
+        cell.classList.remove("hover-player2");
+    }
+  }
+
+  function findAvailableRow(col) {
+    for (let row = board.rows - 1; row >= 0; row--) {
+        if (board.grid[row][col] === null) {
+            return row;
+        }
+    }
+    return null; // If column is full
   }
 
   function resetGame() {
@@ -104,6 +156,8 @@ document.addEventListener("DOMContentLoaded", function () {
             cell.classList.add("cell");
             cell.dataset.row = r;
             cell.dataset.col = c;
+            cell.addEventListener("mouseover", handleHover);
+            cell.addEventListener("mouseout", removeHover);
             cell.addEventListener("click", handleMove);
             boardElement.appendChild(cell);
         }

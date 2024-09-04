@@ -76,13 +76,48 @@ button:hover {
   border-radius: 50%;
 }
 
+@keyframes blink {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+.cell.hover-player1 {
+  background-color: rgba(255, 100, 100, 0.8); 
+  animation: blink 1s infinite; 
+}
+
+.cell.hover-player2 {
+  background-color: rgba(255, 255, 150, 0.8); 
+  animation: blink 1s infinite; 
+}
+
 .player1 {
-  background-color: red;
+  background-color: red; 
 }
 
 .player2 {
-  background-color: yellow;
+  background-color: yellow; 
 }
+
 
 #status {
   font-weight: bold;
