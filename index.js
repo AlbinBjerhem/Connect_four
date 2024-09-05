@@ -6,7 +6,6 @@ import { Rules } from './classes/Rules.js';
 document.addEventListener("DOMContentLoaded", function () {
   const playGameButton = document.getElementById("play-game");
   const replayButton = document.getElementById("replay-game");
-  const resetButton = document.getElementById("reset-game");
   const quitButton = document.getElementById("quit-game");
   const statusDisplay = document.getElementById("status");
   const boardElement = document.getElementById("board");
@@ -25,7 +24,6 @@ document.addEventListener("DOMContentLoaded", function () {
     player2 = new Person(prompt("Enter Player 2 Name:") || "Player 2");
 
     playGameButton.style.display = "none";
-    resetButton.style.display = "block";
     quitButton.style.display = "block";
 
     startGame();
@@ -33,13 +31,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   replayButton.addEventListener("click", resetGame);
 
-  resetButton.addEventListener("click", resetGame)
-
   quitButton.addEventListener("click", function () {
     board = new Board()
     renderBoard()
     playGameButton.style.display = "block";
-    resetButton.style.display = "none";
+    replayButton.style.display = "none"
     quitButton.style.display = "none";
     statusDisplay.style.display = "none";
   })
@@ -99,6 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
       statusDisplay.textContent = `${currentPlayer.name} wins!`;
       gameActive = false;
       replayButton.style.display = "block";
+      resetButton.style.display = "none";
     } else if (Rules.checkDraw(board)) {
       statusDisplay.textContent = "It's a draw!";
       gameActive = false;
