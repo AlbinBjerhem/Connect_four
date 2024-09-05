@@ -36,12 +36,12 @@ document.addEventListener("DOMContentLoaded", function () {
   resetButton.addEventListener("click", resetGame)
 
   quitButton.addEventListener("click", function () {
+    board = new Board()
     renderBoard()
     playGameButton.style.display = "block";
     resetButton.style.display = "none";
     quitButton.style.display = "none";
-    player1 = ''
-    player2 = ''
+    statusDisplay.style.display = "none";
   })
 
   function renderBoard() {
@@ -60,6 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function startGame() {
     gameActive = true;
     currentPlayer = player1;
+    statusDisplay.style.display = "block";
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
 
     boardElement.innerHTML = '';
