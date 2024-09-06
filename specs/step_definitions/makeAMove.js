@@ -4,26 +4,26 @@ Given('the user starts on the start page', () => {
   cy.visit('http://localhost:5500');
 });
 
-When('the user presses the {string} button', (a) => {
-  cy.contains(a).click();
+Given('the user presses the {string} button', (a) => {
+  cy.contains(a).click()
 });
 
-/* No duplicate steps, this one already above
-When('the user presses the {string} button', (a) => {});*/
-
-When('the user presses the {string} button again', (a) => {
-  cy.window().then((win) => {
-
-    cy.stub(win, 'click')
-    cy.contains(a).click()// Player 1
-    cy.contains(a).click(); // Player 2
-  });
+When('the user clicks on the 1st column in the board game', () => {
+  cy.get('.cell[data-col="0"]').first().click({ force: true });
 });
 
-When('the user clicks on the first column in the board game', () => {
-  cy.get('.cell[data-col="0"]').first().click();
+Then('the cell in row 5 and column 0 should be player1', () => {
+  cy.get('.cell[data-row="5"][data-col="0"]')
+    .should('have.class', 'cell')
+    .and('have.class', 'player1');
 });
 
-Then('the cell in row 1 and column 1 should be red', () => {
+When('the second user clicks on the 5th column', () => {
+  cy.get('.cell[data-col="4"]').first().click({ force: true });
+});
 
+Then('the cell in row 5 and column 5 should be player2', () => {
+  cy.get('.cell[data-row="5"][data-col="4"]')
+    .should('have.class', 'cell')
+    .and('have.class', 'player2');
 });
