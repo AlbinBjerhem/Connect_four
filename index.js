@@ -5,6 +5,10 @@ import { Rules } from './classes/Rules.js';
 
 document.addEventListener("DOMContentLoaded", function () {
   const playGameButton = document.getElementById("play-game");
+  const startGameButton = document.getElementById("startGameButton");
+  const playerModal = document.getElementById("playerModal");
+  const player1Input = document.getElementById("player1");
+  const player2Input = document.getElementById("player2");
   const replayButton = document.getElementById("replay-game");
   const quitButton = document.getElementById("quit-game");
   const statusDisplay = document.getElementById("status");
@@ -19,10 +23,17 @@ document.addEventListener("DOMContentLoaded", function () {
   renderBoard();
 
   playGameButton.addEventListener("click", function () {
+    playerModal.style.display = "flex";  // Show the modal for entering names
+  });
 
-    player1 = new Person(prompt("Enter Player 1 Name:") || "Player 1");
-    player2 = new Person(prompt("Enter Player 2 Name:") || "Player 2");
+  startGameButton.addEventListener("click", function () {
+    const player1Name = player1Input.value || "Player 1";
+    const player2Name = player2Input.value || "Player 2";
 
+    player1 = new Person(player1Name);
+    player2 = new Person(player2Name);
+
+    playerModal.style.display = "none";  // Hide the modal
     playGameButton.style.display = "none";
     quitButton.style.display = "block";
 
@@ -32,13 +43,13 @@ document.addEventListener("DOMContentLoaded", function () {
   replayButton.addEventListener("click", resetGame);
 
   quitButton.addEventListener("click", function () {
-    board = new Board()
-    renderBoard()
+    board = new Board();
+    renderBoard();
     playGameButton.style.display = "block";
-    replayButton.style.display = "none"
+    replayButton.style.display = "none";
     quitButton.style.display = "none";
     statusDisplay.style.display = "none";
-  })
+  });
 
   function renderBoard() {
     boardElement.innerHTML = '';
