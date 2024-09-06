@@ -88,18 +88,6 @@ button:hover {
   }
 }
 
-@keyframes blink {
-  0% {
-    opacity: 0.5;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.5;
-  }
-}
-
 .cell.hover-player1 {
   background-color: rgba(255, 100, 100, 0.8); 
   animation: blink 1s infinite; 
@@ -117,7 +105,6 @@ button:hover {
 .player2 {
   background-color: yellow; 
 }
-
 
 #status {
   font-weight: bold;
@@ -180,4 +167,35 @@ button {
   font-size: 1.5em;
   font-weight: bold;
   margin: 5px 0;
+}
+
+/* Mobileview */
+@media only screen and (max-width: 600px) {
+  h1 {
+    font-size: 1.8em;
+  }
+
+  .board {
+    grid-template-columns: repeat(7, 30px);
+    grid-gap: 4px;
+  }
+
+  .cell {
+    width: 30px;
+    height: 30px;
+  }
+
+  button {
+    font-size: 0.9em;
+    padding: 8px 16px;
+  }
+
+  input {
+    width: 90%;
+    max-width: none;
+  }
+
+  #status {
+    font-size: 1em;
+  }
 }
