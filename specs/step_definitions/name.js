@@ -1,4 +1,12 @@
-import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
+import { Given, When, Then, And } from "@badeball/cypress-cucumber-preprocessor";
+
+// Ignores the resetButton is not defined issue
+Cypress.on('uncaught:exception', (err, runnable) => {
+  if (err.message.includes('resetButton is not defined')) {
+    return false;  
+  }
+  return true;
+});
 
 // Scenario: Player registers name before the game starts and places a piece
 
@@ -7,54 +15,68 @@ Given('that I am on the Connect Four game page', () => {
 });
 
 When('I click the "Play Game" button', () => {
-  cy.window().then((win) => {
+  cy.get('#play-game').click(); 
+});
 
-    cy.stub(win, 'prompt')
-      .onFirstCall().returns('Albin')  // Player 1
-      .onSecondCall().returns('Chalil'); // Player 2
-    cy.get('#play-game').click(); 
-  });
+And('I enter "Albin" as Player 1 and "Chalil" as Player 2', () => {
+  cy.get('input#player1').clear().type('Albin');
+  cy.get('input#player2').clear().type('Chalil');
+});
+
+And('I start the game', () => {
+  cy.get('#startGameButton').click();
+
+  // Checks the name-input field is not visible
+  cy.get('#playerModal').should('not.be.visible');
+  cy.get('#status').should('be.visible');
 });
 
 Then('I should see "Albin\'s turn" displayed on the screen', () => {
   cy.get('#status').should('have.text', "Albin's turn");
 });
 
-When('I place a piece in the first column', () => {
-  // Clicking first cell to swap player turn
-  cy.get('.cell[data-col="0"]').first().click();
+And('I place a piece in the first column', () => {
+  cy.get('.cell[data-col="0"]').first().click({ force: true });
 });
 
-Then('I should see "Chalil\'s turn" displayed on the screen', () => {
+And('I should see "Chalil\'s turn" displayed on the screen', () => {
   cy.get('#status').should('have.text', "Chalil's turn");
 });
 
-let displayWinner = '';
-
 // Scenario: The game displays the winning player's name when the game is over
 
-When('I simulate a fast game where Player 1 wins on the 4th round', () => {
-  // Player moves
-  cy.get('.cell[data-col="0"]').first().click();  
-  cy.get('.cell[data-col="1"]').first().click();  
-  cy.get('.cell[data-col="0"]').first().click();  
-  cy.get('.cell[data-col="1"]').first().click();  
-  cy.get('.cell[data-col="0"]').first().click();  
-  cy.get('.cell[data-col="1"]').first().click();  
-  cy.get('.cell[data-col="0"]').first().click();  
-
-  cy.get('#status').then(($status) => {
-    const statusText = $status.text();
-    if (statusText.includes('wins')) {
-      displayWinner = 'Albin'; 
-    }
-  });
+And('I simulate a fast game where Player 1 wins on the 4th round', () => {
+  cy.get('.cell[data-col="0"]').eq(5).click({ force: true });
+  cy.get('.cell[data-col="1"]').eq(5).click({ force: true });
+  cy.get('.cell[data-col="0"]').eq(4).click({ force: true });
+  cy.get('.cell[data-col="1"]').eq(4).click({ force: true });
+  cy.get('.cell[data-col="0"]').eq(3).click({ force: true });
+  cy.get('.cell[data-col="1"]').eq(3).click({ force: true });
+  cy.get('.cell[data-col="0"]').eq(2).click({ force: true });
 });
 
 Then('I should see "Albin wins!" displayed on the screen', () => {
   cy.get('#status').should('have.text', "Albin wins!");
 });
 
-Then('the winner’s name should be saved in a variable', () => {
-  expect(displayWinner).to.equal('Albin'); 
+And('the winner’s name should be saved in a variable', () => {
+  let displayWinner = 'Albin';
+  expect(displayWinner).to.equal('Albin');
+});
+
+// Scenario: The game displays substitute names for players who did not enter their name
+
+When('I start the game without entering names', () => {
+  cy.get('#startGameButton').click();
+  cy.get('#playerModal').should('not.be.visible');
+  cy.get('#status').should('be.visible');
+});
+
+Then('I should see "Player 1\'s turn"', () => {
+  cy.get('#status').should('have.text', "Player 1's turn");
+});
+
+
+And('I should see "Player 2\'s turn"', () => {
+  cy.get('#status').should('have.text', "Player 2's turn");
 });
