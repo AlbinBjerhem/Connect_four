@@ -13,12 +13,18 @@ document.addEventListener("DOMContentLoaded", function () {
   const quitButton = document.getElementById("quit-game");
   const statusDisplay = document.getElementById("status");
   const boardElement = document.getElementById("board");
+  const player1NameDisplay = document.getElementById("player1Name");
+  const player2NameDisplay = document.getElementById("player2Name");
+  const player1ScoreDisplay = document.getElementById("player1Score");
+  const player2ScoreDisplay = document.getElementById("player2Score");
 
   let board = new Board();
   let player1;
   let player2;
   let currentPlayer;
   let gameActive = false;
+  let player1Score = 0;
+  let player2Score = 0;
 
   renderBoard();
 
@@ -33,6 +39,11 @@ document.addEventListener("DOMContentLoaded", function () {
     player1 = new Person(player1Name);
     player2 = new Person(player2Name);
 
+    player1NameDisplay.textContent = player1Name;
+    player2NameDisplay.textContent = player2Name;
+
+    document.querySelector('.scoreboard').style.display = 'flex';
+
     playerModal.style.display = "none";  // Hide the modal
     playGameButton.style.display = "none";
     quitButton.style.display = "block";
@@ -45,10 +56,19 @@ document.addEventListener("DOMContentLoaded", function () {
   quitButton.addEventListener("click", function () {
     board = new Board();
     renderBoard();
+
+    player1Score = 0;
+    player2Score = 0;
+
+    player1ScoreDisplay.textContent = player1Score;
+    player2ScoreDisplay.textContent = player2Score;
+
     playGameButton.style.display = "block";
     replayButton.style.display = "none";
     quitButton.style.display = "none";
     statusDisplay.style.display = "none";
+
+    document.querySelector('.scoreboard').style.display = 'none';
   });
 
   function renderBoard() {
@@ -104,6 +124,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (Rules.checkWin(board, currentPlayer.name, row, placedCol)) {
       statusDisplay.textContent = `${currentPlayer.name} wins!`;
+
+      if (currentPlayer === player1) {
+        player1Score++;
+        player1ScoreDisplay.textContent = player1Score;
+      } else {
+        player2Score++;
+        player2ScoreDisplay.textContent = player2Score;
+      }
+
       gameActive = false;
       replayButton.style.display = "block";
       resetButton.style.display = "none";
