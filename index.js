@@ -5,27 +5,47 @@ import { Rules } from './classes/Rules.js';
 
 document.addEventListener("DOMContentLoaded", function () {
   const playGameButton = document.getElementById("play-game");
+  const startGameButton = document.getElementById("startGameButton");
+  const playerModal = document.getElementById("playerModal");
+  const player1Input = document.getElementById("player1");
+  const player2Input = document.getElementById("player2");
   const replayButton = document.getElementById("replay-game");
-  const resetButton = document.getElementById("reset-game");
   const quitButton = document.getElementById("quit-game");
   const statusDisplay = document.getElementById("status");
   const boardElement = document.getElementById("board");
+  const player1NameDisplay = document.getElementById("player1Name");
+  const player2NameDisplay = document.getElementById("player2Name");
+  const player1ScoreDisplay = document.getElementById("player1Score");
+  const player2ScoreDisplay = document.getElementById("player2Score");
 
   let board = new Board();
   let player1;
   let player2;
   let currentPlayer;
   let gameActive = false;
+  let player1Score = 0;
+  let player2Score = 0;
 
   renderBoard();
 
   playGameButton.addEventListener("click", function () {
+    playerModal.style.display = "flex";  // Show the modal for entering names
+  });
 
-    player1 = new Person(prompt("Enter Player 1 Name:") || "Player 1");
-    player2 = new Person(prompt("Enter Player 2 Name:") || "Player 2");
+  startGameButton.addEventListener("click", function () {
+    const player1Name = player1Input.value || "Player 1";
+    const player2Name = player2Input.value || "Player 2";
 
+    player1 = new Person(player1Name);
+    player2 = new Person(player2Name);
+
+    player1NameDisplay.textContent = player1Name;
+    player2NameDisplay.textContent = player2Name;
+
+    document.querySelector('.scoreboard').style.display = 'flex';
+
+    playerModal.style.display = "none";  // Hide the modal
     playGameButton.style.display = "none";
-    resetButton.style.display = "block";
     quitButton.style.display = "block";
 
     startGame();
@@ -33,16 +53,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
   replayButton.addEventListener("click", resetGame);
 
-  resetButton.addEventListener("click", resetGame)
-
   quitButton.addEventListener("click", function () {
-    renderBoard()
+    board = new Board();
+    renderBoard();
+
+    player1Score = 0;
+    player2Score = 0;
+
+    player1ScoreDisplay.textContent = player1Score;
+    player2ScoreDisplay.textContent = player2Score;
+
     playGameButton.style.display = "block";
-    resetButton.style.display = "none";
+    replayButton.style.display = "none";
     quitButton.style.display = "none";
-    player1 = ''
-    player2 = ''
-  })
+    statusDisplay.style.display = "none";
+
+    document.querySelector('.scoreboard').style.display = 'none';
+  });
 
   function renderBoard() {
     boardElement.innerHTML = '';
@@ -60,6 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function startGame() {
     gameActive = true;
     currentPlayer = player1;
+    statusDisplay.style.display = "block";
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
 
     boardElement.innerHTML = '';
@@ -96,8 +124,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (Rules.checkWin(board, currentPlayer.name, row, placedCol)) {
       statusDisplay.textContent = `${currentPlayer.name} wins!`;
+
+      if (currentPlayer === player1) {
+        player1Score++;
+        player1ScoreDisplay.textContent = player1Score;
+      } else {
+        player2Score++;
+        player2ScoreDisplay.textContent = player2Score;
+      }
+
       gameActive = false;
       replayButton.style.display = "block";
+      resetButton.style.display = "none";
     } else if (Rules.checkDraw(board)) {
       statusDisplay.textContent = "It's a draw!";
       gameActive = false;

@@ -22,9 +22,30 @@
 
     <button id="replay-game" style="display: none;">Play Again</button>
     <button id="play-game">Play Game</button>
-    <button id="reset-game" style="display: none;">Reset Game</button>
     <button id="quit-game" style="display: none;">Quit Game</button>
 
+  </div>
+
+  <div id="playerModal" class="modal">
+    <div class="modal-content">
+      <h2>Enter Player Names</h2>
+      <label for="player1">Player 1:</label>
+      <input type="text" id="player1" placeholder="Enter Player 1 Name">
+      <label for="player2">Player 2:</label>
+      <input type="text" id="player2" placeholder="Enter Player 2 Name">
+      <button id="startGameButton">Start Game</button>
+    </div>
+  </div>
+
+  <div class="scoreboard">
+    <h2>Scoreboard</h2>
+    <div class="player-score">
+      <h3><span id="player1Name">Player 1</span>: <span id="player1Score">0</span></h3>
+    </div>
+
+    <div class="player-score">
+      <h3><span id="player2Name">Player 2</span>: <span id="player2Score">0</span></h3>
+    </div>
   </div>
 
   <script type="module" src="index.js"></script>
