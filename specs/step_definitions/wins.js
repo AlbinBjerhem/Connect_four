@@ -75,6 +75,6 @@ When('I simulate a game where player 2 wins diagonally from top left to bottom r
 });
 
 //Resuable to check status message
-Then('We should see a message saying {string}', (message) => {
+Then('I should see a message saying {string}', (message) => {
   cy.get('#status').should('have.text', message);
 });
