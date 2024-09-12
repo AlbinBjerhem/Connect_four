@@ -17,6 +17,8 @@ Given('that I am on the Connect Four game page', () => {
 
 When('I start the game without entering names', () => {
   cy.get('#startGameButton').click({ force: true });
+  cy.get('#playerModal').should('not.be.visible');
+  cy.get('#status').should('be.visible');
 });
 
 And('I save the initial score', () => {

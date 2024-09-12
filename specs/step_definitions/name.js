@@ -3,19 +3,19 @@ import { Given, When, Then, And } from "@badeball/cypress-cucumber-preprocessor"
 // Ignores the resetButton is not defined issue
 Cypress.on('uncaught:exception', (err, runnable) => {
   if (err.message.includes('resetButton is not defined')) {
-    return false;  
+    return false;
   }
   return true;
 });
 
 // Scenario: Player registers name before the game starts and places a piece
 
-Given('that I am on the Connect Four game page', () => {
-  cy.visit('http://localhost:5500'); 
-});
+// Given('that I am on the Connect Four game page', () => {
+//   cy.visit('http://localhost:5500'); 
+// });
 
 When('I click the "Play Game" button', () => {
-  cy.get('#play-game').click(); 
+  cy.get('#play-game').click();
 });
 
 And('I enter "Albin" as Player 1 and "Chalil" as Player 2', () => {
@@ -66,11 +66,11 @@ And('the winner’s name should be saved in a variable', () => {
 
 // Scenario: The game displays substitute names for players who did not enter their name
 
-When('I start the game without entering names', () => {
-  cy.get('#startGameButton').click();
-  cy.get('#playerModal').should('not.be.visible');
-  cy.get('#status').should('be.visible');
-});
+// When('I start the game without entering names', () => {
+//   cy.get('#startGameButton').click();
+//   cy.get('#playerModal').should('not.be.visible');
+//   cy.get('#status').should('be.visible');
+// });
 
 Then('I should see "Player 1\'s turn"', () => {
   cy.get('#status').should('have.text', "Player 1's turn");
