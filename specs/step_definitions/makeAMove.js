@@ -15,5 +15,5 @@ Then('the cell in row {string} and column {string} should be {string}', (a, b, c
 });
 
 When('the second user clicks on the 5th column', () => {
-  cy.get('.cell[data-col="4"]').first().click({ force: true });
+  cy.get('.cell[data-col="5"]').first().click({ force: true });
 });
