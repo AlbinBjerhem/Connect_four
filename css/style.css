@@ -71,7 +71,7 @@ button:hover {
 .cell {
   width: 50px;
   height: 50px;
-  background-color: #f0f0f0; 
+  background-color: #f0f0f0;
   border: 2px solid #333;
   border-radius: 50%;
 }
@@ -80,30 +80,32 @@ button:hover {
   0% {
     opacity: 0.5;
   }
+
   50% {
     opacity: 1;
   }
+
   100% {
     opacity: 0.5;
   }
 }
 
 .cell.hover-player1 {
-  background-color: rgba(255, 100, 100, 0.8); 
-  animation: blink 1s infinite; 
+  background-color: rgba(255, 100, 100, 0.8);
+  animation: blink 1s infinite;
 }
 
 .cell.hover-player2 {
-  background-color: rgba(255, 255, 150, 0.8); 
-  animation: blink 1s infinite; 
+  background-color: rgba(255, 255, 150, 0.8);
+  animation: blink 1s infinite;
 }
 
 .player1 {
-  background-color: red; 
+  background-color: red;
 }
 
 .player2 {
-  background-color: yellow; 
+  background-color: yellow;
 }
 
 #status {
@@ -141,12 +143,6 @@ button:hover {
   margin: 10px auto;
   padding: 10px;
   font-size: 16px;
-}
-
-button {
-  padding: 10px 20px;
-  margin-top: 20px;
-  cursor: pointer;
 }
 
 .scoreboard {
@@ -188,6 +184,9 @@ button {
   button {
     font-size: 0.9em;
     padding: 8px 16px;
+    margin-top: 20px;
+    cursor: pointer;
+    }
   }
 
   input {
