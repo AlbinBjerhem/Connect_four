@@ -17,6 +17,21 @@ document.addEventListener("DOMContentLoaded", function () {
   const player2NameDisplay = document.getElementById("player2Name");
   const player1ScoreDisplay = document.getElementById("player1Score");
   const player2ScoreDisplay = document.getElementById("player2Score");
+  const columnFullModal = document.createElement('div');
+  const columnFullModalContent = document.createElement('div');
+  const closeModalButton = document.createElement('button');
+
+  columnFullModal.classList.add('modal');
+  columnFullModalContent.classList.add('modal-content');
+  columnFullModalContent.innerHTML = '<p>Column is full, choose another column</p>';
+  closeModalButton.textContent = 'OK';
+  closeModalButton.addEventListener('click', function () {
+    columnFullModal.style.display = 'none';
+  });
+
+  columnFullModalContent.appendChild(closeModalButton);
+  columnFullModal.appendChild(columnFullModalContent);
+  document.body.appendChild(columnFullModal);
 
   let board = new Board();
   let player1;
@@ -112,7 +127,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const col = parseInt(event.target.dataset.col);
 
-    if (board.isColumnFull(col)) return;
+    if (board.isColumnFull(col)) {
+      columnFullModal.style.display = 'flex';
+      return;
+    }
 
     const move = new Move(currentPlayer, col);
     const { row, col: placedCol } = board.placePiece(move.column, move.player.name);
@@ -135,7 +153,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
       gameActive = false;
       replayButton.style.display = "block";
-      resetButton.style.display = "none";
     } else if (Rules.checkDraw(board)) {
       statusDisplay.textContent = "It's a draw!";
       gameActive = false;
@@ -168,7 +185,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const col = parseInt(event.target.dataset.col);
 
-    // To find first available row in column
     const availableRow = findAvailableRow(col);
 
     if (availableRow !== null) {
@@ -183,7 +199,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return row;
       }
     }
-    return null; // If column is full
+    return null;
   }
 
   function resetGame() {
