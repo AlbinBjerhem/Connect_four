@@ -8,18 +8,12 @@ When('the user clicks on the 1st column in the board game', () => {
   cy.get('.cell[data-col="0"]').first().click({ force: true });
 });
 
-Then('the cell in row 5 and column 0 should be player1', () => {
-  cy.get('.cell[data-row="5"][data-col="0"]')
+Then('the cell in row {string} and column {string} should be {string}', (a, b, c) => {
+  cy.get(`.cell[data-row="${a}"][data-col="${b}"]`)
     .should('have.class', 'cell')
-    .and('have.class', 'player1');
+    .and('have.class', c);
 });
 
 When('the second user clicks on the 5th column', () => {
   cy.get('.cell[data-col="4"]').first().click({ force: true });
-});
-
-Then('the cell in row 5 and column 5 should be player2', () => {
-  cy.get('.cell[data-row="5"][data-col="4"]')
-    .should('have.class', 'cell')
-    .and('have.class', 'player2');
 });
