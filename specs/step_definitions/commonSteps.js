@@ -85,6 +85,6 @@ Then('I should see the "Play Game" button displayed on the screen', () => {
   cy.get('#status').should('not.be.visible');
 });
 
-Then('no player names should be present', () => {
-  // Code to ensure no player names are present
+Then('no scoreboard should be present', () => {
+  cy.get('.scoreboard').should('not.be.visible');
 });

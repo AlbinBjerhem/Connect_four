@@ -10,4 +10,4 @@ Feature: Quit the game after a win
     Then I should see a "Quit Game" button displayed on the screen
     When I click the "Quit Game" button
     Then I should see the "Play Game" button displayed on the screen
-    And no player names should be present
+    And no scoreboard should be present
