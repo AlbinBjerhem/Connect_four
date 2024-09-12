@@ -11,7 +11,7 @@ When('the user clicks on the 1st column in the board game', () => {
 Then('the cell in row {string} and column {string} should be {string}', (a, b, c) => {
   cy.get(`.cell[data-row="${a}"][data-col="${b}"]`)
     .should('have.class', 'cell')
-    .and('have.class', c);
+    .and('have.class', `${c}`);
 });
 
 When('the second user clicks on the 5th column', () => {
