@@ -8,22 +8,11 @@ Cypress.on('uncaught:exception', (err, runnable) => {
   return true;
 });
 
-//Reusable steps
-Given('that I am on the Connect Four game page', () => {
-  cy.visit('http://localhost:5500');
-});
-
-Given('I click the {string} button', () => {
-  cy.get('#play-game').click();
-});
+//Steps for given that I am on the connect 4 page, click play game and start game already in name.js
 
 Given('I enter {string} as Player 1 and {string} as Player 2', (player1, player2) => {
   cy.get('input#player1').clear().type(player1);
   cy.get('input#player2').clear().type(player2);
-});
-
-Given('I start the game', () => {
-  cy.get('#startGameButton').click(); 
 });
 
 When('I simulate a game where player 1 wins horizontally', () => {

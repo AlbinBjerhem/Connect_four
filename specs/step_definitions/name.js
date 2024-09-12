@@ -14,10 +14,7 @@ When('I click the "Play Game" button', () => {
   cy.get('#play-game').click();
 });
 
-And('I enter "Albin" as Player 1 and "Chalil" as Player 2', () => {
-  cy.get('input#player1').clear().type('Albin');
-  cy.get('input#player2').clear().type('Chalil');
-});
+// Step for player names in wins.js
 
 And('I start the game', () => {
   cy.get('#startGameButton').click();
