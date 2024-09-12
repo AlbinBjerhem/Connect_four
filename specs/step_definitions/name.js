@@ -10,10 +10,6 @@ Cypress.on('uncaught:exception', (err, runnable) => {
 
 // Scenario: Player registers name before the game starts and places a piece
 
-// Given('that I am on the Connect Four game page', () => {
-//   cy.visit('http://localhost:5500'); 
-// });
-
 When('I click the "Play Game" button', () => {
   cy.get('#play-game').click();
 });
@@ -66,16 +62,9 @@ And('the winner’s name should be saved in a variable', () => {
 
 // Scenario: The game displays substitute names for players who did not enter their name
 
-// When('I start the game without entering names', () => {
-//   cy.get('#startGameButton').click();
-//   cy.get('#playerModal').should('not.be.visible');
-//   cy.get('#status').should('be.visible');
-// });
-
 Then('I should see "Player 1\'s turn"', () => {
   cy.get('#status').should('have.text', "Player 1's turn");
 });
-
 
 And('I should see "Player 2\'s turn"', () => {
   cy.get('#status').should('have.text', "Player 2's turn");
