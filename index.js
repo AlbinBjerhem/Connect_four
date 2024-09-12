@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
   renderBoard();
 
   playGameButton.addEventListener("click", function () {
-    playerModal.style.display = "flex";  // Show the modal for entering names
+    playerModal.style.display = "flex";
   });
 
   startGameButton.addEventListener("click", function () {
@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelector('.scoreboard').style.display = 'flex';
 
-    playerModal.style.display = "none";  // Hide the modal
+    playerModal.style.display = "none";
     playGameButton.style.display = "none";
     quitButton.style.display = "block";
 
@@ -140,8 +140,15 @@ document.addEventListener("DOMContentLoaded", function () {
     cell.classList.remove("hover-player1", "hover-player2");
     cell.classList.add(currentPlayer === player1 ? "player1" : "player2");
 
-    if (Rules.checkWin(board, currentPlayer.name, row, placedCol)) {
+    const winningDiscs = Rules.checkWin(board, currentPlayer.name, row, placedCol);
+
+    if (winningDiscs) {
       statusDisplay.textContent = `${currentPlayer.name} wins!`;
+
+      winningDiscs.forEach(disc => {
+        const winningCell = document.querySelector(`.cell[data-row='${disc.row}'][data-col='${disc.col}']`);
+        winningCell.classList.add("blink");
+      });
 
       if (currentPlayer === player1) {
         player1Score++;

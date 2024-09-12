@@ -6,12 +6,14 @@ export class Rules {
 
     for (let { r: dr, c: dc } of directions) {
       let count = 1;
+      let winningDiscs = [{ row, col }];
 
       for (let i = 1; i < 4; i++) {
         const r = row + dr * i;
         const c = col + dc * i;
         if (r >= 0 && r < board.rows && c >= 0 && c < board.cols && board.grid[r][c] === player) {
           count++;
+          winningDiscs.push({ row: r, col: c });
         } else {
           break;
         }
@@ -22,14 +24,17 @@ export class Rules {
         const c = col - dc * i;
         if (r >= 0 && r < board.rows && c >= 0 && c < board.cols && board.grid[r][c] === player) {
           count++;
+          winningDiscs.push({ row: r, col: c });
         } else {
           break;
         }
       }
 
-      if (count >= 4) return true;
+      if (count >= 4) {
+        return winningDiscs;
+      }
     }
-    return false;
+    return null;
   }
 
   static checkDraw(board) {
