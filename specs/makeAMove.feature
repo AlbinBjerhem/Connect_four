@@ -2,14 +2,14 @@ Feature: As a user, I want to be able to make my move so that it is correctly re
 
 
   Scenario: Check if the correct spot is registerd to player1
-    Given the user starts on the start page
+    Given that I am on the Connect Four game page
     And the user presses the "Play Game" button
     And the user presses the "Start Game" button
     When the user clicks on the 1st column in the board game
     Then the cell in row 5 and column 0 should be player1
 
   Scenario: Check if the correct spot is registerd to player2
-    Given the user starts on the start page
+    Given that I am on the Connect Four game page
     And the user presses the "Play Game" button
     And the user presses the "Start Game" button
     When the user clicks on the 1st column in the board game

@@ -1,9 +1,5 @@
 import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 
-Given('the user starts on the start page', () => {
-  cy.visit('http://localhost:5500');
-});
-
 Given('the user presses the {string} button', (a) => {
   cy.contains(a).click()
 });
