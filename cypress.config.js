@@ -13,6 +13,7 @@ module.exports = defineConfig(
       video: false,
       supportFile: false,
       screenshotOnRunFailure: false,
+      experimentalRunAllSpecs: true, 
       setupNodeEvents(on, config) {
         // implement node event listeners here
 
