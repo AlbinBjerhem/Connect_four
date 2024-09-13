@@ -21,6 +21,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const columnFullModalContent = document.createElement('div');
   const closeModalButton = document.createElement('button');
 
+  const nameErrorModal = document.createElement('div');
+  const nameErrorModalContent = document.createElement('div');
+  const closeNameErrorModalButton = document.createElement('button');
+
   columnFullModal.classList.add('modal');
   columnFullModalContent.classList.add('modal-content');
   columnFullModalContent.innerHTML = '<p>Column is full, choose another column</p>';
@@ -32,6 +36,18 @@ document.addEventListener("DOMContentLoaded", function () {
   columnFullModalContent.appendChild(closeModalButton);
   columnFullModal.appendChild(columnFullModalContent);
   document.body.appendChild(columnFullModal);
+
+  nameErrorModal.classList.add('modal');
+  nameErrorModalContent.classList.add('modal-content');
+  nameErrorModalContent.innerHTML = '<p>Players must have different names!</p>';
+  closeNameErrorModalButton.textContent = 'OK';
+  closeNameErrorModalButton.addEventListener('click', function () {
+    nameErrorModal.style.display = 'none';
+  });
+
+  nameErrorModalContent.appendChild(closeNameErrorModalButton);
+  nameErrorModal.appendChild(nameErrorModalContent);
+  document.body.appendChild(nameErrorModal);
 
   let board = new Board();
   let player1;
@@ -48,8 +64,13 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   startGameButton.addEventListener("click", function () {
-    const player1Name = player1Input.value || "Player 1";
-    const player2Name = player2Input.value || "Player 2";
+    const player1Name = player1Input.value.trim() || "Player 1";
+    const player2Name = player2Input.value.trim() || "Player 2";
+
+    if (player1Name === player2Name) {
+      nameErrorModal.style.display = 'flex';
+      return;
+    }
 
     player1 = new Person(player1Name);
     player2 = new Person(player2Name);
