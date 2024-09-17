@@ -1,124 +1,252 @@
-import Person from './classes/Person.js';
-import Move from './classes/Move.js';
-import promptSync from 'prompt-sync';
-export { Game };
+import { Board } from './classes/Board.js';
+import { Move } from './classes/Move.js';
+import { Person } from './classes/Person.js';
+import { Rules } from './classes/Rules.js';
 
-const prompt = promptSync();
+document.addEventListener("DOMContentLoaded", function () {
+  const playGameButton = document.getElementById("play-game");
+  const startGameButton = document.getElementById("startGameButton");
+  const playerModal = document.getElementById("playerModal");
+  const player1Input = document.getElementById("player1");
+  const player2Input = document.getElementById("player2");
+  const replayButton = document.getElementById("replay-game");
+  const quitButton = document.getElementById("quit-game");
+  const statusDisplay = document.getElementById("status");
+  const boardElement = document.getElementById("board");
+  const player1NameDisplay = document.getElementById("player1Name");
+  const player2NameDisplay = document.getElementById("player2Name");
+  const player1ScoreDisplay = document.getElementById("player1Score");
+  const player2ScoreDisplay = document.getElementById("player2Score");
+  const columnFullModal = document.createElement('div');
+  const columnFullModalContent = document.createElement('div');
+  const closeModalButton = document.createElement('button');
 
-class Game {
-  constructor() {
-    this.player1 = null;
-    this.player2 = null;
-    this.currentPlayer = null;
-    this.playAgain = true;
-  }
+  const nameErrorModal = document.createElement('div');
+  const nameErrorModalContent = document.createElement('div');
+  const closeNameErrorModalButton = document.createElement('button');
 
-  // Method to start the game
-  start() {
-    this.setupPlayers();
-    while (this.playAgain) {
-      this.playGame();
-      this.askToPlayAgain();
+  columnFullModal.classList.add('modal');
+  columnFullModalContent.classList.add('modal-content');
+  columnFullModalContent.innerHTML = '<p>Column is full, choose another column</p>';
+  closeModalButton.textContent = 'OK';
+  closeModalButton.addEventListener('click', function () {
+    columnFullModal.style.display = 'none';
+  });
+
+  columnFullModalContent.appendChild(closeModalButton);
+  columnFullModal.appendChild(columnFullModalContent);
+  document.body.appendChild(columnFullModal);
+
+  nameErrorModal.classList.add('modal');
+  nameErrorModalContent.classList.add('modal-content');
+  nameErrorModalContent.innerHTML = '<p>Players must have different names!</p>';
+  closeNameErrorModalButton.textContent = 'OK';
+  closeNameErrorModalButton.addEventListener('click', function () {
+    nameErrorModal.style.display = 'none';
+  });
+
+  nameErrorModalContent.appendChild(closeNameErrorModalButton);
+  nameErrorModal.appendChild(nameErrorModalContent);
+  document.body.appendChild(nameErrorModal);
+
+  let board = new Board();
+  let player1;
+  let player2;
+  let currentPlayer;
+  let gameActive = false;
+  let player1Score = 0;
+  let player2Score = 0;
+
+  renderBoard();
+
+  playGameButton.addEventListener("click", function () {
+    playerModal.style.display = "flex";
+  });
+
+  startGameButton.addEventListener("click", function () {
+    const player1Name = player1Input.value.trim() || "Player 1";
+    const player2Name = player2Input.value.trim() || "Player 2";
+
+    if (player1Name === player2Name) {
+      nameErrorModal.style.display = 'flex';
+      return;
     }
-    console.log("Thank you for playing!");
-  }
 
-  // Method to setup the players
-  setupPlayers() {
-    this.player1 = new Person(prompt("Enter name for Player 1 (X): "), 'X');
-    this.player2 = new Person(prompt("Enter name for Player 2 (O): "), 'O');
-    this.currentPlayer = this.player1;
-  }
+    player1 = new Person(player1Name);
+    player2 = new Person(player2Name);
 
-  // Method to handle the game logic
-  playGame() {
-    const move = new Move();
-    let gameContinues = true;
+    player1NameDisplay.textContent = player1Name;
+    player2NameDisplay.textContent = player2Name;
 
-    while (gameContinues) {
-      console.clear();
-      console.log("Current Board: ");
-      move.board.showBoard();
+    document.querySelector('.scoreboard').style.display = 'flex';
 
-      let moveResult;
-      do {
-        moveResult = this.makeOneMove(move);
-        if (moveResult === 'exit') {
-          gameContinues = false;
-          this.playAgain = false;
-          break;
-        }
-      } while (moveResult === 'Column is full, choose another column' || moveResult === 'Invalid input');
+    playerModal.style.display = "none";
+    playGameButton.style.display = "none";
+    quitButton.style.display = "block";
 
-      if (!gameContinues) break;
+    startGame();
+  });
 
-      console.log(moveResult);
+  replayButton.addEventListener("click", resetGame);
 
-      if (moveResult.includes('wins!') || moveResult.includes('Game over')) {
-        gameContinues = false;
-        move.board.showBoard();
-      } else {
-        this.switchPlayer();
+  quitButton.addEventListener("click", function () {
+    board = new Board();
+    renderBoard();
+
+    player1Score = 0;
+    player2Score = 0;
+
+    player1ScoreDisplay.textContent = player1Score;
+    player2ScoreDisplay.textContent = player2Score;
+
+    playGameButton.style.display = "block";
+    replayButton.style.display = "none";
+    quitButton.style.display = "none";
+    statusDisplay.style.display = "none";
+
+    document.querySelector('.scoreboard').style.display = 'none';
+  });
+
+  function renderBoard() {
+    boardElement.innerHTML = '';
+    for (let r = 0; r < board.rows; r++) {
+      for (let c = 0; c < board.cols; c++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.row = r;
+        cell.dataset.col = c;
+        boardElement.appendChild(cell);
       }
     }
   }
 
-  // Method to handle player move
-  makeOneMove(move) {
-    const columnInput = prompt(`${this.currentPlayer.name}'s turn. Choose a column (1-${move.board.columns}) or type 'exit' to quit: `);
+  function startGame() {
+    gameActive = true;
+    currentPlayer = player1;
+    statusDisplay.style.display = "block";
+    statusDisplay.textContent = `${currentPlayer.name}'s turn`;
 
-    if (columnInput === null || columnInput === undefined || columnInput.toLowerCase() === 'exit') {
-      console.log("Game terminated by the user.");
-      return 'exit';
-    }
+    boardElement.innerHTML = '';
+    for (let r = 0; r < board.rows; r++) {
+      for (let c = 0; c < board.cols; c++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.row = r;
+        cell.dataset.col = c;
 
-    const column = parseInt(columnInput) - 1;
-    if (isNaN(column) || column < 0 || column >= move.board.columns) {
-      console.log('Invalid input. Column is out of bounds, choose another column.');
-      return 'Invalid input';
-    }
+        cell.addEventListener("mouseover", handleHover);
+        cell.addEventListener("mouseout", removeHover);
+        cell.addEventListener("click", handleMove);
 
-    const moveResult = move.makeMove(column, this.currentPlayer.symbol, this.currentPlayer.name);
-
-    if (moveResult === 'Column is full, choose another column') {
-      console.log(moveResult);
-    }
-
-    return moveResult;
-  }
-
-  // Method to switch the current player
-  switchPlayer() {
-    this.currentPlayer = this.currentPlayer === this.player1 ? this.player2 : this.player1;
-  }
-
-  // Method to ask if players want to play again
-  askToPlayAgain() {
-    let validInput = false;
-    while (!validInput) {
-      const playAgainInput = prompt("Do you want to play again? (yes/no): ");
-
-      if (playAgainInput === null || playAgainInput === undefined || typeof playAgainInput !== 'string') {
-        console.log("Invalid input. Please enter yes or no.");
-      } else {
-        switch (playAgainInput.toLowerCase()) {
-          case 'yes':
-            this.playAgain = true;
-            validInput = true;
-            break;
-          case 'no':
-            this.playAgain = false;
-            validInput = true;
-            break; // Add break here to prevent fall-through
-          default:
-            console.log("Invalid input. Please enter yes or no.");
-            break;
-        }
+        boardElement.appendChild(cell);
       }
     }
   }
-}
 
-// Start the game
-const game = new Game();
-game.start();
+  function handleMove(event) {
+    if (!gameActive) return;
+
+    const col = parseInt(event.target.dataset.col);
+
+    if (board.isColumnFull(col)) {
+      columnFullModal.style.display = 'flex';
+      return;
+    }
+
+    const move = new Move(currentPlayer, col);
+    const { row, col: placedCol } = board.placePiece(move.column, move.player.name);
+
+    const cell = document.querySelector(`.cell[data-row='${row}'][data-col='${placedCol}']`);
+
+    cell.classList.remove("hover-player1", "hover-player2");
+    cell.classList.add(currentPlayer === player1 ? "player1" : "player2");
+
+    const winningDiscs = Rules.checkWin(board, currentPlayer.name, row, placedCol);
+
+    if (winningDiscs) {
+      statusDisplay.textContent = `${currentPlayer.name} wins!`;
+
+      winningDiscs.forEach(disc => {
+        const winningCell = document.querySelector(`.cell[data-row='${disc.row}'][data-col='${disc.col}']`);
+        winningCell.classList.add("blink");
+      });
+
+      if (currentPlayer === player1) {
+        player1Score++;
+        player1ScoreDisplay.textContent = player1Score;
+      } else {
+        player2Score++;
+        player2ScoreDisplay.textContent = player2Score;
+      }
+
+      gameActive = false;
+      replayButton.style.display = "block";
+    } else if (Rules.checkDraw(board)) {
+      statusDisplay.textContent = "It's a draw!";
+      gameActive = false;
+      replayButton.style.display = "block";
+    } else {
+      currentPlayer = currentPlayer === player1 ? player2 : player1;
+      statusDisplay.textContent = `${currentPlayer.name}'s turn`;
+    }
+  }
+
+  function handleHover(event) {
+    if (!gameActive) return;
+
+    const col = parseInt(event.target.dataset.col);
+    const availableRow = findAvailableRow(col);
+
+    if (availableRow !== null) {
+      const cell = document.querySelector(`.cell[data-row='${availableRow}'][data-col='${col}']`);
+
+      if (currentPlayer === player1) {
+        cell.classList.add("hover-player1");
+      } else {
+        cell.classList.add("hover-player2");
+      }
+    }
+  }
+
+  function removeHover(event) {
+    if (!gameActive) return;
+
+    const col = parseInt(event.target.dataset.col);
+
+    const availableRow = findAvailableRow(col);
+
+    if (availableRow !== null) {
+      const cell = document.querySelector(`.cell[data-row='${availableRow}'][data-col='${col}']`);
+      cell.classList.remove("hover-player1", "hover-player2");
+    }
+  }
+
+  function findAvailableRow(col) {
+    for (let row = board.rows - 1; row >= 0; row--) {
+      if (board.grid[row][col] === null) {
+        return row;
+      }
+    }
+    return null;
+  }
+
+  function resetGame() {
+    board = new Board();
+    gameActive = true;
+    currentPlayer = player1;
+    statusDisplay.textContent = `${currentPlayer.name}'s turn`;
+
+    replayButton.style.display = "none";
+
+    renderBoard();
+
+    for (let r = 0; r < board.rows; r++) {
+      for (let c = 0; c < board.cols; c++) {
+        const cell = document.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);
+        cell.addEventListener("mouseover", handleHover);
+        cell.addEventListener("mouseout", removeHover);
+        cell.addEventListener("click", handleMove);
+      }
+    }
+  }
+});

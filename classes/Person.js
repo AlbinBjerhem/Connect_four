@@ -1,6 +1,5 @@
-export default class Person {
-  constructor(name, symbol) {
+export class Person {
+  constructor(name) {
     this.name = name;
-    this.symbol = symbol
   }
 }
