@@ -2,13 +2,14 @@ import { Board } from './classes/Board.js';
 import { Move } from './classes/Move.js';
 import { Person } from './classes/Person.js';
 import { Rules } from './classes/Rules.js';
+import { Ai } from './classes/Ai.js';
 
 document.addEventListener("DOMContentLoaded", function () {
   const playGameButton = document.getElementById("play-game");
   const startGameButton = document.getElementById("startGameButton");
   const playerModal = document.getElementById("playerModal");
   const player1Input = document.getElementById("player1");
-  const player2Input = document.getElementById("player2");
+  const aiLevel = document.getElementById("ai-level")
   const replayButton = document.getElementById("replay-game");
   const quitButton = document.getElementById("quit-game");
   const statusDisplay = document.getElementById("status");
@@ -65,18 +66,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
   startGameButton.addEventListener("click", function () {
     const player1Name = player1Input.value.trim() || "Player 1";
-    const player2Name = player2Input.value.trim() || "Player 2";
+    const level = aiLevel;
 
-    if (player1Name === player2Name) {
+    if (player1Name === 'AI') {
       nameErrorModal.style.display = 'flex';
       return;
     }
 
     player1 = new Person(player1Name);
-    player2 = new Person(player2Name);
+    player2 = new Ai(level, board);
 
     player1NameDisplay.textContent = player1Name;
-    player2NameDisplay.textContent = player2Name;
+    player2NameDisplay.textContent = player2.name;
 
     document.querySelector('.scoreboard').style.display = 'flex';
 
@@ -145,8 +146,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function handleMove(event) {
     if (!gameActive) return;
-
-    const col = parseInt(event.target.dataset.col);
+    let col;
+    if (currentPlayer == 'player1') {
+      col = parseInt(event.target.dataset.col);
+    } else {
+      col = player2.makeBotMove()
+    }
 
     if (board.isColumnFull(col)) {
       columnFullModal.style.display = 'flex';
@@ -188,6 +193,9 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       currentPlayer = currentPlayer === player1 ? player2 : player1;
       statusDisplay.textContent = `${currentPlayer.name}'s turn`;
+    }
+    if (currentPlayer === 'player2') {
+      handleMove()
     }
   }
 

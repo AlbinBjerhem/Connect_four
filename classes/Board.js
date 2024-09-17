@@ -1,8 +1,11 @@
+import { WinChecker } from './WinChecker.js';
+
 export class Board {
-  constructor(rows = 6, cols = 7) {
-    this.rows = rows;
-    this.cols = cols;
+  constructor() {
+    this.rows = 6;
+    this.cols = 7;
     this.grid = Array.from({ length: rows }, () => Array(cols).fill(null));
+    this.winChecker = new WinChecker(this);
   }
 
   isColumnFull(col) {
