@@ -40,4 +40,5 @@ export class Rules {
   static checkDraw(board) {
     return board.isFull();
   }
+
 }
