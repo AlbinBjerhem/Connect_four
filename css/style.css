@@ -186,18 +186,18 @@ button:hover {
     padding: 8px 16px;
     margin-top: 20px;
     cursor: pointer;
-    }
   }
+}
 
-  input {
-    width: 90%;
-    max-width: none;
-  }
+input {
+  width: 90%;
+  max-width: none;
+}
 
-  #status {
-    font-size: 1em;
-  }
-  
+#status {
+  font-size: 1em;
+}
+
 @keyframes blink {
   0% {
     opacity: 0.5;
@@ -214,4 +214,8 @@ button:hover {
 
 .blink {
   animation: blink 1s infinite;
+}
+
+.no-click {
+  pointer-events: none;
 }

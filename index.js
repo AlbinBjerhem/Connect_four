@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const startGameButton = document.getElementById("startGameButton");
   const playerModal = document.getElementById("playerModal");
   const player1Input = document.getElementById("player1");
-  const aiLevel = document.getElementById("ai-level")
+  const aiLevel = document.getElementById("ai-level");
   const replayButton = document.getElementById("replay-game");
   const quitButton = document.getElementById("quit-game");
   const statusDisplay = document.getElementById("status");
@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   startGameButton.addEventListener("click", function () {
     const player1Name = player1Input.value.trim() || "Player 1";
-    const level = aiLevel;
+    const level = aiLevel.value;
 
     if (player1Name === 'AI') {
       nameErrorModal.style.display = 'flex';
@@ -144,31 +144,39 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function handleMove(event) {
-    if (!gameActive) return;
+  async function handleMove(event) {
+    if (!gameActive) return;  // If the game is not active, do nothing
     let col;
-    if (currentPlayer == 'player1') {
-      col = parseInt(event.target.dataset.col);
+
+    if (currentPlayer === player1) {
+      col = parseInt(event.target.dataset.col);  // No need to await parseInt
+      console.log(col)
+      disableClicks();  // Disable player clicks after making a move
     } else {
-      col = player2.makeBotMove()
+      disableClicks();  // Disable player clicks during AI move
+      col = await player2.makeBotMove();  // Get the AI's move
     }
 
+    // Check if the selected column is full
     if (board.isColumnFull(col)) {
       columnFullModal.style.display = 'flex';
+      enableClicks();  // Re-enable clicks so the player can try another column
       return;
     }
 
     const move = new Move(currentPlayer, col);
-    const { row, col: placedCol } = board.placePiece(move.column, move.player.name);
+    const { row, col: placedCol } = board.placePiece(move.column, move.player.name);  // Place the move on the board
 
+    // Update the UI to reflect the placed piece
     const cell = document.querySelector(`.cell[data-row='${row}'][data-col='${placedCol}']`);
-
     cell.classList.remove("hover-player1", "hover-player2");
     cell.classList.add(currentPlayer === player1 ? "player1" : "player2");
 
+    // Check if the current move results in a win
     const winningDiscs = Rules.checkWin(board, currentPlayer.name, row, placedCol);
 
     if (winningDiscs) {
+      // If the current player wins, update the display and score
       statusDisplay.textContent = `${currentPlayer.name} wins!`;
 
       winningDiscs.forEach(disc => {
@@ -184,20 +192,34 @@ document.addEventListener("DOMContentLoaded", function () {
         player2ScoreDisplay.textContent = player2Score;
       }
 
-      gameActive = false;
+      gameActive = false;  // Disable game after a win
       replayButton.style.display = "block";
-    } else if (Rules.checkDraw(board)) {
+      return;
+    }
+
+    // Check for a draw
+    if (Rules.checkDraw(board)) {
       statusDisplay.textContent = "It's a draw!";
       gameActive = false;
       replayButton.style.display = "block";
-    } else {
-      currentPlayer = currentPlayer === player1 ? player2 : player1;
-      statusDisplay.textContent = `${currentPlayer.name}'s turn`;
+      return;
     }
-    if (currentPlayer === 'player2') {
-      handleMove()
+
+    // Switch turns
+    currentPlayer = currentPlayer === player1 ? player2 : player1;
+    statusDisplay.textContent = `${currentPlayer.name}'s turn`;
+
+    // Handle AI move with a slight delay (for animation purposes)
+    if (currentPlayer === player2) {
+      setTimeout(async () => {
+        await handleMove();  // AI makes its move
+        enableClicks();  // Re-enable clicks after AI has made its move
+      }, 500);  // AI move delay
+    } else {
+      enableClicks();  // Re-enable clicks for the player
     }
   }
+
 
   function handleHover(event) {
     if (!gameActive) return;
@@ -258,3 +280,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 });
+
+function disableClicks() {
+  const gameBoard = document.querySelector('#board');
+  gameBoard.classList.add('no-click');
+}
+
+// Function to enable user interaction
+function enableClicks() {
+  const gameBoard = document.querySelector('#board');
+  gameBoard.classList.remove('no-click');
+}
