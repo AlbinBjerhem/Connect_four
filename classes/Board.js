@@ -30,48 +30,4 @@ export class Board {
   reset() {
     this.grid = Array.from({ length: this.rows }, () => Array(this.cols).fill(null));
   }
-
-  // Kontrollera om en spelare har vunnit
-  checkWin(player, row, col) {
-    return (
-      this.checkDirection(player, row, col, 0, 1) ||  // Horisontellt
-      this.checkDirection(player, row, col, 1, 0) ||  // Vertikalt
-      this.checkDirection(player, row, col, 1, 1) ||  // Diagonalt nedåt höger
-      this.checkDirection(player, row, col, 1, -1)    // Diagonalt nedåt vänster
-    );
-  }
-
-  // Kontrollera en riktning för fyra i rad
-  checkDirection(player, row, col, rowDir, colDir) {
-    let count = 1;
-
-    // Kontrollera framåt i riktningen
-    count += this.countInDirection(player, row, col, rowDir, colDir);
-
-    // Kontrollera bakåt i riktningen
-    count += this.countInDirection(player, row, col, -rowDir, -colDir);
-
-    // Om vi hittar fyra eller fler i rad har vi en vinst
-    return count >= 4;
-  }
-
-  // Räkna hur många pjäser som finns i en given riktning
-  countInDirection(player, row, col, rowDir, colDir) {
-    let count = 0;
-    let r = row + rowDir;
-    let c = col + colDir;
-
-    while (this.isValidCell(r, c) && this.grid[r][c] === player) {
-      count++;
-      r += rowDir;
-      c += colDir;
-    }
-
-    return count;
-  }
-
-  // Kontrollera om cellen är inom brädets gränser
-  isValidCell(row, col) {
-    return row >= 0 && row < this.rows && col >= 0 && col < this.cols;
-  }
 }

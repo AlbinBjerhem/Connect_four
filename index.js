@@ -124,6 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function startGame() {
     gameActive = true;
     currentPlayer = player1;
+    enableClicks()
     statusDisplay.style.display = "block";
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
 
@@ -263,6 +264,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function resetGame() {
     board = new Board();
     gameActive = true;
+    enableClicks()
     currentPlayer = player1;
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
 
