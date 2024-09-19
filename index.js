@@ -112,11 +112,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const boardElement = document.getElementById("board");
     boardElement.innerHTML = '';  // Clear the board before drawing it
 
-    for (let row = 0; row < 6; row++) {
+    for (let row = 0; row < board.rows; row++) {
       const rowDiv = document.createElement("div");
       rowDiv.classList.add("row");
 
-      for (let col = 0; col < 7; col++) {
+      for (let col = 0; col < board.cols; col++) {
         const cellDiv = document.createElement("div");
         cellDiv.classList.add("cell");
         cellDiv.dataset.row = row;

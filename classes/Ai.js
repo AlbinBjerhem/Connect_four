@@ -27,8 +27,7 @@ export class Ai {
 
   // Slumpmässigt val av drag för den enkla AI:n
   makeDumbBotMove() {
-    const legalMoves = this.legalMoves();
-    return shuffleArray(legalMoves)[0]; // Välj ett slumpmässigt drag från giltiga drag
+    return shuffleArray(this.legalMoves)[0]; // Välj ett slumpmässigt drag från giltiga drag
   }
 
   // Strategiskt val för den smarta AI:n
