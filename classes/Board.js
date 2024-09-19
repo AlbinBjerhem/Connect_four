@@ -95,4 +95,12 @@ export class Board {
 
     return newBoard;
   }
+
+  undoMove(row, column) {
+    if (this.grid[row][column].color !== ' ' || this.grid[row][column].color !== null) {
+      this.grid[row][column].color = ' '; // Reset the cell to empty
+    } else {
+      console.log("Error: The cell is already empty.");
+    }
+  }
 }
