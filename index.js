@@ -109,15 +109,22 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   function renderBoard() {
-    boardElement.innerHTML = '';
-    for (let r = 0; r < board.rows; r++) {
-      for (let c = 0; c < board.cols; c++) {
-        const cell = document.createElement("div");
-        cell.classList.add("cell");
-        cell.dataset.row = r;
-        cell.dataset.col = c;
-        boardElement.appendChild(cell);
+    const boardElement = document.getElementById("board");
+    boardElement.innerHTML = '';  // Clear the board before drawing it
+
+    for (let row = 0; row < 6; row++) {
+      const rowDiv = document.createElement("div");
+      rowDiv.classList.add("row");
+
+      for (let col = 0; col < 7; col++) {
+        const cellDiv = document.createElement("div");
+        cellDiv.classList.add("cell");
+        cellDiv.dataset.row = row;
+        cellDiv.dataset.col = col;
+        rowDiv.appendChild(cellDiv);
       }
+
+      boardElement.appendChild(rowDiv);
     }
   }
 

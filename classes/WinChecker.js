@@ -1,43 +1,45 @@
-import { WinCombo } from "./WinCombo.js";
+import { WinCombo } from './WinCombo.js';
 
 export class WinChecker {
-
   constructor(board) {
     this.board = board;
-    this.matrix = board.matrix;
-    // 8 different winCombos for Tic-Tac-Toe
-    // (had it been Connect-4 we would 69 winCombos)
+    this.matrix = board.grid;
     this.winCombos = [];
     this.calculateWinCombos();
   }
 
-  // calculate all the win combos once and remember them
-  // this programming pattern is called memoization
-  // (and helps save processing power / speeds up the program)
+  // Calculate all the win combos for Connect 4
   calculateWinCombos() {
-    // m - a short alias for this.matrix
     let m = this.matrix;
-    // represent ways you can win as offset from ONE position on the board
-    let offsets = [
-      [[5, 0], [5, 1], [5, 2], [5, 3]],  // horizontal win
-      [[5, 0], [4, 0], [3, 0], [2, 0]],  // vertical win
-      [[5, 0], [4, 1], [3, 2], [2, 3]],  // diagonal 1 win
-      [[5, 3], [4, 2], [3, 1], [2, 0]] // diagonal 2 win
+    let directions = [
+      // Horizontal right
+      [[0, 0], [0, 1], [0, 2], [0, 3]],
+      // Vertical down
+      [[0, 0], [1, 0], [2, 0], [3, 0]],
+      // Diagonal down-right
+      [[0, 0], [1, 1], [2, 2], [3, 3]],
+      // Diagonal down-left
+      [[0, 0], [1, -1], [2, -2], [3, -3]]
     ];
-    // loop through the board to find all winCombos
 
-    // r = row, c = column
+    // Traverse the board and generate winCombos
     for (let r = 0; r < m.length; r++) {
       for (let c = 0; c < m[0].length; c++) {
-        // ro = row offset, co = column offset
-        for (let winType of offsets) {
+        for (let dir of directions) {
           let combo = [];
-          for (let [ro, co] of winType) {
-            if (r + ro < 0 || r + ro >= m.length) { continue; }
-            if (c + co < 0 || c + co >= m[0].length) { continue; }
-            combo.push(m[r + ro][c + co]);
+
+          for (let [dr, dc] of dir) {
+            const row = r + dr;
+            const col = c + dc;
+
+            // Ensure indices are within bounds
+            if (row >= 0 && row < m.length && col >= 0 && col < m[0].length) {
+              combo.push(m[row][col]);
+            }
           }
-          if (combo.length === 3) {
+
+          // Only create WinCombo if we have exactly 4 cells
+          if (combo.length === 4) {
             this.winCombos.push(new WinCombo(combo));
           }
         }
@@ -45,12 +47,12 @@ export class WinChecker {
     }
   }
 
+  // Check for a winner
   winCheck() {
     for (let winCombo of this.winCombos) {
-      if (winCombo.isWin('X')) { this.board.winningCombo = winCombo; return 'X'; }
-      if (winCombo.isWin('O')) { this.board.winningCombo = winCombo; return 'O'; }
+      if (winCombo.isWin('X')) { return 'X'; }
+      if (winCombo.isWin('O')) { return 'O'; }
     }
-    return false;
+    return null;
   }
-
 }

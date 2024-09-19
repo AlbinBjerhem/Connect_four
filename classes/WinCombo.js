@@ -6,7 +6,7 @@ export class WinCombo {
   constructor(cells) {
     // filter cells so it only contains instances of Cell
     cells = cells.filter(x => x instanceof Cell);
-    // if we don't have three cells in the array something is wrong
+    // if we don't have four cells in the array something is wrong
     if (cells.length !== 4) {
       throw new Error('Each win combo must contain 4 cells.');
     }
@@ -19,7 +19,7 @@ export class WinCombo {
   }
 
   isWin(color) {
-    // if all three cells are the same color we have a win
+    // if all four cells are the same color we have a win
     return this.numberOfCells(color) === 4;
   }
 }
