@@ -7,51 +7,46 @@ export class Board {
     this.cols = 7;  // Number of columns
 
     // Initialize grid with Cell objects
+    /*
     this.grid = Array.from({ length: this.rows }, (_, rowIndex) =>
       Array.from({ length: this.cols }, (_, colIndex) =>
         new Cell(rowIndex, colIndex)
       )
     );
+*/
+    try {
+      this.grid = Array.from({ length: this.rows }, (_, rowIndex) =>
+        Array.from({ length: this.cols }, (_, colIndex) =>
+          new Cell(rowIndex, colIndex)
+        )
+      );
+    } catch (error) {
+      console.error(`Error initializing grid: ${error}`);
+    }
+
 
     this.winChecker = new WinChecker(this);
   }
 
   // Check if a column is full
   isColumnFull(col) {
-    console.log('Checking column:', col);
-    console.log('Grid state:', this.grid);
     if (col < 0 || col >= this.cols) {
       throw new Error(`Column index ${col} is out of bounds.`);
     }
     const cell = this.grid[0][col];
-    console.log('Top cell in column:', cell);
     return cell.color !== null;  // Check if the top cell in the column is filled
   }
 
 
   // Place a piece in the given column
   placePiece(col, playerColor) {
-    // Check if the column index is within bounds
-    if (col < 0 || col >= this.cols) {
-      throw new Error(`Column index ${col} is out of bounds.`);
-    }
-
-    // Start from the bottom of the column
     for (let row = this.rows - 1; row >= 0; row--) {
       // Check if the row index is within bounds and if the cell exists
-      if (this.grid[row] && this.grid[row][col] && this.grid[row][col].color === null) {
+      if (this.grid[row][col] && (this.grid[row][col].color === ' ' || this.grid[row][col].color === null)) {
         this.grid[row][col].setColor(playerColor);  // Set the color to the player's color
         return { row, col };  // Return the position where the piece was placed
       }
     }
-
-    return null;  // Return null if the column is full
-  }
-
-
-  // Check if the board is full (for a draw)
-  isFull() {
-    return this.grid[0].every(cell => cell.color !== null);  // Check if the top row is filled
   }
 
   // Reset the board
@@ -64,5 +59,40 @@ export class Board {
 
   winCheck() {
     return this.winChecker.winCheck();
+  }
+
+  // Check if the board is full (for a draw)
+  isFull() {
+    return this.grid.every(row => row.every(cell => cell.color !== ' ' && cell.color !== null));  // Check if every cell is filled
+  }
+
+  isGameOver() {
+    // Check if there is a winner
+    if (this.winChecker.winCheck()) {
+      return true;
+    }
+
+    // Check if the board is full (draw condition)
+    if (this.isFull()) {
+      return true; // The game is over if the board is full
+    }
+
+    return false; // Game is not over if there is no winner and the board is not full
+  }
+
+  clone() {
+    const newBoard = new Board(); // Create a new instance of the Board class
+
+    if (this.boardState !== undefined && this.boardState !== null) {
+      newBoard.boardState = JSON.parse(JSON.stringify(this.boardState)); // Deep clone the 2D array using JSON
+    } else {
+      newBoard.boardState = []; // Initialize an empty 2D array if boardState is undefined or null
+    }
+
+    // Copy other relevant properties (if any)
+    newBoard.color = this.color;
+    // ... copy other properties ...
+
+    return newBoard;
   }
 }

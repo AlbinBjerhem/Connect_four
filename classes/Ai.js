@@ -1,33 +1,47 @@
 export class Ai {
   constructor(type, board) {
-    this.name = "AI"; // Namnet på AI-spelaren
-    this.type = type; // AI-nivå: 'dumb' (enkel) eller 'smart' (svår)
-    this.board = board; // Hänvisning till spelets bräda
-    this.color = 'yellow'; // Standardfärg för AI:s brickor
-    this.opponent = 'red'; // Motståndarens färg
+    this.name = "AI"; // Name of the AI player
+    this.type = type; // AI level: 'dumb' (easy) or 'smart' (hard)
+    this.board = board; // Reference to the game board
+    this.color = 'yellow'; // Default color for AI's pieces
+    this.opponent = 'red'; // Opponent's color
+
+    // Define AI's priorities
+    this.priorities = {
+      offensive: 12,
+      defensive: 10,
+      winning: 100,
+      blocking: 60
+    };
   }
 
-  // Simulerar AI-draget med en kort fördröjning för att efterlikna tänketid
+  // Simulates AI's move with a delay to mimic thinking time
   async makeBotMove() {
-    await sleep(500); // Fördröjning på 500ms
+    await sleep(500); // Delay for 500ms
     let column;
 
-    // Om AI:n är enkel ("dumb"), välj ett slumpmässigt drag
+    // If AI is 'dumb', make a random move
     if (this.type === 'dumb') {
       column = this.makeDumbBotMove();
-      console.log(`dumb: ${column}`)
+      console.log(`dumb: ${column}`);
     }
 
-    // Om AI:n är svår ("smart"), välj ett strategiskt drag
+    // If AI is 'smart', make a strategic move
     if (this.type === 'smart') {
       column = this.makeSmartBotMove();
-      console.log(`smart: ${column}`)
+      console.log(`smart: ${column}`);
     }
-    console.log(column[1])
-    return column[1];
+
+    if (column !== null) {
+      console.log(`AI return ${column[1]}`);
+      return column[1];
+    } else {
+      console.log("No move found");
+      return null; // or some default value
+    }
   }
 
-  // Slumpmässigt val av drag för den enkla AI:n
+  // Random move for 'dumb' AI
   makeDumbBotMove() {
     console.log("Legal moves:", this.legalMoves);
     const moves = shuffleArray(this.legalMoves);
@@ -35,81 +49,247 @@ export class Ai {
     return moves[0]; // Return the first random move
   }
 
-
-  // Strategiskt val för den smarta AI:n
+  // Strategic move for 'smart' AI with dynamic depth
   makeSmartBotMove() {
-    // orgState - the current state on the board
-    let orgState = this.state();
-    // store scores for each possible move in scores
-    let scores = [];
-    // loop through/try each legal/possible move
-    for (let [row, column] of this.legalMoves) {
-      let cell = this.board.grid[row][column];
-      cell.color = this.color; // make temporary move
-      let futureState = this.state(); // the state if we made this move
-      cell.color = ' '; // undo temporary move
-      // remember the score for this possible move
-      scores.push({ row, column, score: this.score(orgState, futureState) });
+    let bestMove = null;
+    let bestScore = -Infinity;
+    const legalMoves = this.legalMoves;
+
+    for (let [row, column] of legalMoves) {
+      // Create a copy of the board
+      const boardCopy = this.board.clone();
+
+      // Simulate the move on the board copy
+      boardCopy.placePiece(column, this.color);
+
+      // Evaluate the board state
+      let score = this.evaluateBoard(boardCopy);
+
+      console.log(`Evaluating move ${column} with score ${score}`);
+
+      // Update the best move if the score is better
+      if (score > bestScore) {
+        bestScore = score;
+        bestMove = column;
+      }
     }
-    scores = shuffleArray(scores).sort((a, b) => a.score > b.score ? -1 : 1);
-    let { row, column } = scores[0];
-    return [row, column];
+
+    console.log(`Best move: ${bestMove} with score ${bestScore}`);
+    return bestMove;
   }
 
-  score(orgState, futureState) {
-    // priorities - what is considered the best outcome in each winCombo
-    let priorities = [
-      { me: 3 }, { opp: 2 }, { opp: 1 }, { me: 2 }, { me: 1 }
-    ];
-    // score variable - which we will use to calculate a score
-    let score = 0;
-    // loop through each part of the states, corresponding to a winCombo
-    for (let i = 0; i < orgState.length; i++) {
-      // short aliases for each orgState and futureState part
-      // b - before/orgState, a - after/futureState
-      let b = orgState[i], a = futureState[i];
-      // no change in winCombo - not interesting
-      if (b.me === a.me && b.opp === a.opp) { continue; }
-      // winCombo can't be won be either player (both already have pieces in place)
-      if (b.me > 0 && b.opp > 0) { continue; }
-      // there has been change in this winCombo, so I must have added a piece
-      let partScore = '';
-      // partScore is how good are move is for ONE winCombo
-      // partScore will become number of different priorities x 2 long
-      // initially it is a string, but we will convert to a number before
-      // adding to the total score
-      for (let j = 0; j < priorities.length; j++) {
-        let key = Object.keys(priorities[j])[0];
-        let value = priorities[j][key];
-        if (a[key] === value) { partScore += '01'; }
-        else { partScore += '00'; }
-      }
-      score += +partScore;
+
+  // Simulates AI's move with a delay to mimic thinking time
+  async makeBotMove() {
+    await sleep(500); // Delay for 500ms
+    let column;
+
+    // If AI is 'dumb', make a random move
+    if (this.type === 'dumb') {
+      column = this.makeDumbBotMove();
+      console.log(`dumb: ${column}`);
     }
 
-    // (the scoreing works well in Tic-Tac-Toe
-    // but in Connect 4 it misses that what it considers the best move (highest score)
-    // will sometimes give the opponent an opportunity to win by playing the same column
-    // (ie. directly "above") the chosen move
-    // you can avoid this by trying to play an opponent move in the same column
-    // and if that gives a win set score to negative - 1)
+    // If AI is 'smart', make a strategic move
+    if (this.type === 'smart') {
+      column = this.makeSmartBotMove();
+      console.log(`smart: ${column}`);
+    }
+
+    console.log(`AI return ${column}`); // This will throw an error if column is null
+    return column;
+  }
+
+  // Minimax with alpha-beta pruning
+  minimax(depth, isMaximizingPlayer, alpha, beta) {
+    if (depth === 0 || this.board.isGameOver()) {
+      return this.evaluateBoard() + this.getGameContextScore(this.state(), this.state(), this.board);
+    }
+
+    if (isMaximizingPlayer) {
+      let maxEval = -Infinity;
+      for (let [row, column] of this.legalMoves) {
+        this.board.grid[row][column].color = this.color; // Simulate AI move
+        let eVal = this.minimax(depth - 1, false, alpha, beta); // Recurse with opponent's turn
+        this.board.grid[row][column].color = ' '; // Undo move
+        maxEval = Math.max(eVal, maxEval);
+        alpha = Math.max(alpha, eVal);  // Update alpha
+        if (beta <= alpha) {
+          break;  // Beta cut-off
+        }
+      }
+      return maxEval;
+    } else {
+      let minEval = Infinity;
+      for (let [row, column] of this.legalMoves) {
+        this.board.grid[row][column].color = this.opponent; // Simulate opponent move
+        let eVal = this.minimax(depth - 1, true, alpha, beta); // Recurse with AI's turn
+        this.board.grid[row][column].color = ' '; // Undo move
+        minEval = Math.min(eVal, minEval);
+        beta = Math.min(beta, eVal);  // Update beta
+        if (beta <= alpha) {
+          break;  // Alpha cut-off
+        }
+      }
+      return minEval;
+    }
+  }
+
+  // Evaluate board and return a score based on the current state
+  /**
+ * Evaluates the given board and returns a score based on the number of pieces in rows, columns, and diagonals.
+ *
+ * @param {array} board - A 2D array representing the board.
+ * @returns {number} - The score based on the evaluation.
+ */
+  evaluateBoard(board) {
+    let score = 0;
+
+    // Check if the board is empty
+    if (!board || board.length === 0) {
+      return score; // or throw an error, depending on your requirements
+    }
+
+    // Evaluate rows
+    for (let row = 0; row < board.length; row++) {
+      let piecesInRow = 0;
+      for (let col = 0; col < board[row].length; col++) {
+        if (board[row][col] === this.color) {
+          piecesInRow++;
+        }
+      }
+      score += getScoreForPieces(piecesInRow);
+    }
+
+    // Evaluate columns
+    for (let col = 0; col < (board[0] ? board[0].length : 0); col++) {
+      let piecesInCol = 0;
+      for (let row = 0; row < board.length; row++) {
+        if (board[row][col] === this.color) {
+          piecesInCol++;
+        }
+      }
+      score += getScoreForPieces(piecesInCol);
+    }
+
+    // Evaluate diagonals
+    let piecesInDiag1 = 0;
+    let piecesInDiag2 = 0;
+    for (let i = 0; i < board.length; i++) {
+      if (board[i][i] === this.color) piecesInDiag1++;
+      if (board[i][board[0].length - i - 1] === this.color) piecesInDiag2++;
+    }
+    score += this.getScoreForPieces(piecesInDiag1);
+    score += this.getScoreForPieces(piecesInDiag2);
 
     return score;
   }
 
+  /**
+   * Returns a score based on the number of pieces.
+   *
+   * @param {number} pieces - The number of pieces.
+   * @returns {number} - The score.
+   */
+  getScoreForPieces(pieces) {
+    if (pieces === 1) return 1;
+    if (pieces === 2) return 10;
+    if (pieces === 3) return 100;
+    return 0;
+  }
+
+  // Get score for combination
+  getScoreForCombination(currentState, futureStatePart, priorities, board) {
+    let score = 0;
+
+    // Encourage building longer chains
+    if (futureStatePart.me > currentState.me) {
+      score += priorities.offensive * (futureStatePart.me - currentState.me) * 3; // Offensive score boosted
+    }
+
+    // Discourage allowing the opponent to build chains
+    if (futureStatePart.opp > currentState.opp) {
+      score -= priorities.defensive * (futureStatePart.opp - currentState.opp) * 2; // Stronger penalty for allowing chains
+    }
+
+    // Prioritize center columns (stronger positions)
+    const centerBias = Math.abs(board.cols / 2 - futureStatePart.column);
+    score -= centerBias * 2;  // Favor central positions more
+
+    // Winning/Blocking moves are prioritized heavily
+    if (futureStatePart.me === 4) {
+      score += priorities.winning;
+    }
+    if (futureStatePart.opp === 4) {
+      score += priorities.blocking;
+    }
+
+    return score;
+  }
+
+  // Get game context score
+  getGameContextScore(orgState, futureState, board) {
+    let gameScore = 0;
+    const totalMoves = board.rows * board.cols;
+    const occupiedCells = board.grid.flat().filter(cell => cell.color !== ' ').length;
+    const gameProgress = occupiedCells / totalMoves;
+
+    // Prioritize more critical moves as the game nears the end
+    if (gameProgress > 0.7) {
+      for (let i = 0; i < orgState.length; i++) {
+        if (futureState[i].me === 4) {
+          gameScore += 1000; // Winning move
+        }
+        if (futureState[i].opp === 4) {
+          gameScore += 800; // Blocking opponent's winning move
+        }
+      }
+    }
+
+    return gameScore;
+  }
+
+  // Simulate opponent move
+  simulateOpponentMove(futureState, i, board, opponentColor) {
+    // Create a copy of the futureState to simulate opponent's move
+    let simulatedState = [...futureState];
+
+    // Look at the combination of cells in the future state
+    let combo = simulatedState[i]; // e.g., a possible win combination
+
+    // Simulate opponent filling an empty cell in the combination
+    // Look for the first empty spot in the win combo
+    for (let cellIndex in combo) {
+      let cell = combo[cellIndex];
+
+      // Check if this cell is empty
+      if (cell.color === null || cell.color === ' ') {
+        // Simulate opponent move by setting the color to opponent's
+        combo[cellIndex].color = opponentColor;
+        break; // Stop once we've simulated the opponent's move
+      }
+    }
+
+    return simulatedState;
+  }
+
+  // Get all legal moves available on the board
   get legalMoves() {
-    let moves = [];
+    const moves = [];
+
     for (let col = 0; col < this.board.cols; col++) {
       for (let row = this.board.rows - 1; row >= 0; row--) {  // Start from the bottom row
-        if (this.board.grid[row][col].color === null) {  // If the cell is empty
+        if (this.board.grid[row][col].color === ' ' || this.board.grid[row][col].color === null) {  // If the cell is empty
           moves.push([row, col]);  // Add the empty cell's row and column
           break;  // Stop checking once the first empty cell is found in the column
         }
       }
     }
+    console.log(`legalmoves: ${JSON.stringify(moves)}`);
     return moves;
   }
 
+  // Get the current state of the board
   state() {
     let state = [];
     for (let winCombo of this.board.winChecker.winCombos) {
@@ -122,12 +302,12 @@ export class Ai {
   }
 }
 
-// Hjälpfunktion för att fördröja AI:s drag
+// Helper function to delay AI's move
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Funktion för att blanda om en array (används för att välja slumpmässiga drag för dumb AI)
+// Function to shuffle an array (used for dumb AI)
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

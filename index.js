@@ -173,7 +173,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Extract row and col from the placedCell
     const { row, col: placedCol } = placedCell;
-    console.log(`row: ${row} col: ${placedCol}`)
 
     // Update the UI to reflect the placed piece
     const cellElement = document.querySelector(`.cell[data-row='${row}'][data-col='${placedCol}']`);
@@ -181,10 +180,6 @@ document.addEventListener("DOMContentLoaded", function () {
     cellElement.classList.add(currentPlayer === player1 ? "player1" : "player2");
 
     // Check if the current move results in a win
-    console.log(placedCol)
-    console.log(row)
-    console.log(currentPlayer.color)
-    console.log(board)
     const winningDiscs = Rules.checkWin(board, currentPlayer.color, row, placedCol);
 
     if (winningDiscs) {
