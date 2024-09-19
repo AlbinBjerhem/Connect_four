@@ -15,20 +15,26 @@ export class Ai {
     // Om AI:n är enkel ("dumb"), välj ett slumpmässigt drag
     if (this.type === 'dumb') {
       column = this.makeDumbBotMove();
+      console.log(`dumb: ${column}`)
     }
 
     // Om AI:n är svår ("smart"), välj ett strategiskt drag
     if (this.type === 'smart') {
       column = this.makeSmartBotMove();
+      console.log(`smart: ${column}`)
     }
-
-    return column;
+    console.log(column[1])
+    return column[1];
   }
 
   // Slumpmässigt val av drag för den enkla AI:n
   makeDumbBotMove() {
-    return shuffleArray(this.legalMoves)[0]; // Välj ett slumpmässigt drag från giltiga drag
+    console.log("Legal moves:", this.legalMoves);
+    const moves = shuffleArray(this.legalMoves);
+    console.log("Shuffled moves:", moves);
+    return moves[0]; // Return the first random move
   }
+
 
   // Strategiskt val för den smarta AI:n
   makeSmartBotMove() {
@@ -38,7 +44,7 @@ export class Ai {
     let scores = [];
     // loop through/try each legal/possible move
     for (let [row, column] of this.legalMoves) {
-      let cell = this.board.matrix[row][column];
+      let cell = this.board.grid[row][column];
       cell.color = this.color; // make temporary move
       let futureState = this.state(); // the state if we made this move
       cell.color = ' '; // undo temporary move
@@ -92,13 +98,12 @@ export class Ai {
   }
 
   get legalMoves() {
-    // which cells are free to choose?
-    // (in Connect-4 this would be a check of which columns that are not full instead)
     let moves = [];
-    for (let row = 0; row < this.board.grid.length; row++) {
-      for (let column = 0; column < this.board.grid[0].length; column++) {
-        if (this.board.grid[row][column].color === ' ') {
-          moves.push([row, column]);
+    for (let col = 0; col < this.board.cols; col++) {
+      for (let row = this.board.rows - 1; row >= 0; row--) {  // Start from the bottom row
+        if (this.board.grid[row][col].color === null) {  // If the cell is empty
+          moves.push([row, col]);  // Add the empty cell's row and column
+          break;  // Stop checking once the first empty cell is found in the column
         }
       }
     }

@@ -109,22 +109,15 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   function renderBoard() {
-    const boardElement = document.getElementById("board");
-    boardElement.innerHTML = '';  // Clear the board before drawing it
-
-    for (let row = 0; row < board.rows; row++) {
-      const rowDiv = document.createElement("div");
-      rowDiv.classList.add("row");
-
-      for (let col = 0; col < board.cols; col++) {
-        const cellDiv = document.createElement("div");
-        cellDiv.classList.add("cell");
-        cellDiv.dataset.row = row;
-        cellDiv.dataset.col = col;
-        rowDiv.appendChild(cellDiv);
+    boardElement.innerHTML = '';
+    for (let r = 0; r < board.rows; r++) {
+      for (let c = 0; c < board.cols; c++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.row = r;
+        cell.dataset.col = c;
+        boardElement.appendChild(cell);
       }
-
-      boardElement.appendChild(rowDiv);
     }
   }
 
@@ -158,11 +151,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (currentPlayer === player1) {
       col = parseInt(event.target.dataset.col);  // No need to await parseInt
-      console.log(col)
+      console.log("Player move, column:", col);
       disableClicks();  // Disable player clicks after making a move
     } else {
       disableClicks();  // Disable player clicks during AI move
       col = await player2.makeBotMove();  // Get the AI's move
+      console.log("AI move, column:", col);
     }
 
     // Check if the selected column is full
@@ -172,24 +166,35 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const move = new Move(currentPlayer, col);
-    const { row, col: placedCol } = board.placePiece(move.column, move.player.name);  // Place the move on the board
+    const move = new Move(currentPlayer, col);  // Create the move
+
+    // Place the piece on the board and get the Cell where it was placed
+    const placedCell = board.placePiece(move.column, currentPlayer.color);  // Assuming placePiece now returns a Cell object
+
+    // Extract row and col from the placedCell
+    const { row, col: placedCol } = placedCell;
+    console.log(`row: ${row} col: ${placedCol}`)
 
     // Update the UI to reflect the placed piece
-    const cell = document.querySelector(`.cell[data-row='${row}'][data-col='${placedCol}']`);
-    cell.classList.remove("hover-player1", "hover-player2");
-    cell.classList.add(currentPlayer === player1 ? "player1" : "player2");
+    const cellElement = document.querySelector(`.cell[data-row='${row}'][data-col='${placedCol}']`);
+    cellElement.classList.remove("hover-player1", "hover-player2");
+    cellElement.classList.add(currentPlayer === player1 ? "player1" : "player2");
 
     // Check if the current move results in a win
-    const winningDiscs = Rules.checkWin(board, currentPlayer.name, row, placedCol);
+    console.log(placedCol)
+    console.log(row)
+    console.log(currentPlayer)
+    console.log(board)
+    const winningDiscs = Rules.checkWin(board, currentPlayer, row, placedCol);
 
     if (winningDiscs) {
       // If the current player wins, update the display and score
       statusDisplay.textContent = `${currentPlayer.name} wins!`;
 
+      // Highlight the winning cells
       winningDiscs.forEach(disc => {
-        const winningCell = document.querySelector(`.cell[data-row='${disc.row}'][data-col='${disc.col}']`);
-        winningCell.classList.add("blink");
+        const winningCellElement = document.querySelector(`.cell[data-row='${disc.row}'][data-col='${disc.col}']`);
+        winningCellElement.classList.add("blink");
       });
 
       if (currentPlayer === player1) {

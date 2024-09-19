@@ -5,8 +5,7 @@ export class Cell {
     this.color = null;
   }
 
-  toString() {
-    return this.color;
+  setColor(color) {
+    this.color = color;  // Set the color when a piece is placed
   }
-
 }
