@@ -50,8 +50,8 @@ export class WinChecker {
   // Check for a winner
   winCheck() {
     for (let winCombo of this.winCombos) {
-      if (winCombo.isWin('X')) { return 'X'; }
-      if (winCombo.isWin('O')) { return 'O'; }
+      if (winCombo.isWin('red')) { return 'red'; }
+      if (winCombo.isWin('yellow')) { return 'yellow'; }
     }
     return null;
   }

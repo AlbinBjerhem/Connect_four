@@ -183,9 +183,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // Check if the current move results in a win
     console.log(placedCol)
     console.log(row)
-    console.log(currentPlayer)
+    console.log(currentPlayer.color)
     console.log(board)
-    const winningDiscs = Rules.checkWin(board, currentPlayer, row, placedCol);
+    const winningDiscs = Rules.checkWin(board, currentPlayer.color, row, placedCol);
 
     if (winningDiscs) {
       // If the current player wins, update the display and score
