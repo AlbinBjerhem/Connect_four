@@ -6,14 +6,6 @@ export class Board {
     this.rows = 6;  // Number of rows
     this.cols = 7;  // Number of columns
 
-    // Initialize grid with Cell objects
-    /*
-    this.grid = Array.from({ length: this.rows }, (_, rowIndex) =>
-      Array.from({ length: this.cols }, (_, colIndex) =>
-        new Cell(rowIndex, colIndex)
-      )
-    );
-*/
     try {
       this.grid = Array.from({ length: this.rows }, (_, rowIndex) =>
         Array.from({ length: this.cols }, (_, colIndex) =>
@@ -23,7 +15,6 @@ export class Board {
     } catch (error) {
       console.error(`Error initializing grid: ${error}`);
     }
-
 
     this.winChecker = new WinChecker(this);
   }
