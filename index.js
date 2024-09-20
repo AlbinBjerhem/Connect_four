@@ -53,6 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let board = new Board();
   let player1;
   let player2;
+  let aiLv = null
   let currentPlayer;
   let gameActive = false;
   let player1Score = 0;
@@ -66,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   startGameButton.addEventListener("click", function () {
     const player1Name = player1Input.value.trim() || "Player 1";
-    const level = aiLevel.value;
+    aiLv = aiLevel.value;
 
     if (player1Name === 'AI') {
       nameErrorModal.style.display = 'flex';
@@ -74,7 +75,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     player1 = new Person(player1Name);
-    player2 = new Ai(level, board);
+    player2 = new Ai(aiLv, board);
 
     player1NameDisplay.textContent = player1Name;
     player2NameDisplay.textContent = player2.name;
@@ -91,6 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
   replayButton.addEventListener("click", resetGame);
 
   quitButton.addEventListener("click", function () {
+    aiLv = null
     board = new Board();
     renderBoard();
 
@@ -272,6 +274,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function resetGame() {
     board = new Board();
+    player2 = new Ai(aiLv, board)
     gameActive = true;
     enableClicks()
     currentPlayer = player1;
