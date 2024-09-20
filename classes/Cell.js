@@ -9,8 +9,4 @@ export class Cell {
     this.color = color;  // Set the color when a piece is placed
   }
 
-  clone() {
-    // Create a new Cell instance with the same properties as the original
-    return new Cell(this.rowIndex, this.columnIndex, this.color);
-  }
 }

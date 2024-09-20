@@ -30,7 +30,7 @@ export class Board {
     for (let row = this.rows - 1; row >= 0; row--) {
       // Check if the row index is within bounds and if the cell exists
       if (this.grid[row][col] && (this.grid[row][col].color === ' ' || this.grid[row][col].color === null)) {
-        this.grid[row][col].setColor(playerColor);  // Set the color to the player's color
+        this.grid[row][col].color = playerColor;
         return { row, col };  // Return the position where the piece was placed
       }
     }
@@ -67,23 +67,17 @@ export class Board {
     return false; // Game is not over if there is no winner and the board is not full
   }
 
-
-  // Clone method
+  // Clone the board
   clone() {
-    const newBoard = new Board(); // Create a new Board with same dimensions
+    const newBoard = new Board();
+    newBoard.grid = this.grid.map(row => row.map(cell => {
+      const newCell = new Cell(cell.row, cell.col);
+      newCell.color = cell.color;  // Copy the cell color
+      return newCell;
+    }));
 
-    // Deep clone the grid with new Cell instances
-    newBoard.grid = this.grid.map(row => {
-      return row.map(cell => cell.clone()); // Use the Cell's clone method to clone each cell
-    });
-
-    // Clone other board properties
-    newBoard.winChecker = new WinChecker(newBoard); // Reinitialize WinChecker with the cloned board
-
-    // You can copy any additional properties here, if necessary
-
+    newBoard.winChecker = new WinChecker(newBoard)
     return newBoard;
   }
-
 
 }

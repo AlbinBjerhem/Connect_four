@@ -150,11 +150,13 @@ document.addEventListener("DOMContentLoaded", function () {
     let col;
 
     if (currentPlayer === player1) {
+      currentPlayer.color = 'red'
       col = parseInt(event.target.dataset.col);  // No need to await parseInt
       console.log("Player move, column:", col);
       disableClicks();  // Disable player clicks after making a move
     } else {
       disableClicks();  // Disable player clicks during AI move
+      currentPlayer.color = 'yellow'
       col = await player2.makeBotMove();  // Get the AI's move
       console.log("AI move, column:", col);
     }
