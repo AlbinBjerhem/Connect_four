@@ -57,9 +57,16 @@ export class Ai {
         bestMove = column;
       }
     }
+    this.test()
+    console.table(legalMoves)
     //    console.log(`Best move is column ${bestMove} with score ${bestScore}`);
 
     return bestMove;
+  }
+  test() {
+    const testBoard = this.board.clone();
+    const testLegalMoves = this.legalMoves(testBoard)
+    console.table(testLegalMoves)
   }
 
   // Minimax with alpha-beta pruning, using Ai's legalMoves instead of board.getLegalMoves()
@@ -69,7 +76,6 @@ export class Ai {
     }
 
     const legalMoves = this.legalMoves(fakeBoard); // Use Ai's legalMoves
-
     if (isMaximizingPlayer) {
       let maxEval = -Infinity;
       for (let [row, column] of legalMoves) {
@@ -183,6 +189,5 @@ export class Ai {
   undoMove(row, column, fakeBoard) {
     fakeBoard.grid[row][column].color = ' '; // Clear the move
   }
-
 
 }

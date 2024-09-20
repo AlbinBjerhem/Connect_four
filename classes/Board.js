@@ -6,15 +6,11 @@ export class Board {
     this.rows = 6;  // Number of rows
     this.cols = 7;  // Number of columns
 
-    try {
-      this.grid = Array.from({ length: this.rows }, (_, rowIndex) =>
-        Array.from({ length: this.cols }, (_, colIndex) =>
-          new Cell(rowIndex, colIndex)
-        )
-      );
-    } catch (error) {
-      console.error(`Error initializing grid: ${error}`);
-    }
+    this.grid = Array.from({ length: this.rows }, (_, rowIndex) =>
+      Array.from({ length: this.cols }, (_, colIndex) =>
+        new Cell(rowIndex, colIndex)
+      )
+    );
 
     this.winChecker = new WinChecker(this);
   }
@@ -71,19 +67,23 @@ export class Board {
     return false; // Game is not over if there is no winner and the board is not full
   }
 
+
+  // Clone method
   clone() {
-    const newBoard = new Board(); // Create a new instance of the Board class
+    const newBoard = new Board(); // Create a new Board with same dimensions
 
-    if (this.boardState !== undefined && this.boardState !== null) {
-      newBoard.boardState = JSON.parse(JSON.stringify(this.boardState)); // Deep clone the 2D array using JSON
-    } else {
-      newBoard.boardState = []; // Initialize an empty 2D array if boardState is undefined or null
-    }
+    // Deep clone the grid with new Cell instances
+    newBoard.grid = this.grid.map(row => {
+      return row.map(cell => cell.clone()); // Use the Cell's clone method to clone each cell
+    });
 
-    // Copy other relevant properties (if any)
-    newBoard.color = this.color;
-    // ... copy other properties ...
+    // Clone other board properties
+    newBoard.winChecker = new WinChecker(newBoard); // Reinitialize WinChecker with the cloned board
+
+    // You can copy any additional properties here, if necessary
 
     return newBoard;
   }
+
+
 }
