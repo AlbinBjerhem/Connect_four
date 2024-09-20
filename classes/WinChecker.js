@@ -55,4 +55,45 @@ export class WinChecker {
     }
     return null;
   }
+
+  isWinningMove(row, column, color) {
+    return (
+      this.checkDirection(row, column, color, 0, 1) || // Horizontal
+      this.checkDirection(row, column, color, 1, 0) || // Vertical
+      this.checkDirection(row, column, color, 1, 1) || // Diagonal (\)
+      this.checkDirection(row, column, color, 1, -1)   // Diagonal (/)
+    );
+  }
+
+  checkDirection(row, column, color, rowDelta, colDelta) {
+    let count = 1; // Count the piece at (row, column)
+
+    // Check in the positive direction (right/up diagonally)
+    count += this.countPiecesInDirection(row, column, color, rowDelta, colDelta);
+
+    // Check in the negative direction (left/down diagonally)
+    count += this.countPiecesInDirection(row, column, color, -rowDelta, -colDelta);
+
+    return count >= 4; // Return true if we have 4 or more in a row
+  }
+
+  countPiecesInDirection(row, column, color, rowDelta, colDelta) {
+    let count = 0;
+    let currentRow = row + rowDelta;
+    let currentCol = column + colDelta;
+
+    // Continue while we are inside the board bounds
+    while (currentRow >= 0 && currentRow < this.board.rows && currentCol >= 0 && currentCol < this.board.cols) {
+      if (this.board.grid[currentRow][currentCol].color === color) {
+        count++;
+        currentRow += rowDelta; // Move further in the direction
+        currentCol += colDelta;
+      } else {
+        break; // Stop if we encounter a different color or an empty cell
+      }
+    }
+
+    return count;
+  }
 }
+

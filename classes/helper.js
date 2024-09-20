@@ -15,4 +15,13 @@ export class Helper {
     }
     return array;
   }
+
+  getNextAvailableRow(board, column) {
+    for (let row = board.rows - 1; row >= 0; row--) {
+      if (board.grid[row][column].color === ' ' || board.grid[row][column].color === null) {
+        return [row, column]; // Return the available row and column
+      }
+    }
+    return null; // No available row in the column (the column is full)
+  }
 }

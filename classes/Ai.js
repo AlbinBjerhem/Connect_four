@@ -46,37 +46,36 @@ export class Ai {
       const boardCopy = this.board.clone();
       boardCopy.placePiece(column, this.color); // Simulate move
       let score = this.minimax(boardCopy, depth - 1, false, -Infinity, Infinity);
-      console.log(`column: ${column} score: ${score}`);
+      //      console.log(`row: ${row} column: ${column} score: ${score}`);
 
       // Prioritize blocking the opponent if needed
       const opponentBlockScore = this.evaluateImmediateOpponentThreat(column);
       score += opponentBlockScore; // Add blocking score if opponent is threatening
-      console.log("after block score: ", score)
+      //      console.log("after block score: ", score)
       if (score > bestScore) {
         bestScore = score;
         bestMove = column;
       }
     }
-    console.table(legalMoves);
-    console.log(`Best move is column ${bestMove} with score ${bestScore}`);
+    //    console.log(`Best move is column ${bestMove} with score ${bestScore}`);
 
     return bestMove;
   }
 
   // Minimax with alpha-beta pruning, using Ai's legalMoves instead of board.getLegalMoves()
-  minimax(board, depth, isMaximizingPlayer, alpha, beta) {
-    if (depth === 0 || board.isGameOver()) {
-      return this.evaluateBoard(board);
+  minimax(fakeBoard, depth, isMaximizingPlayer, alpha, beta) {
+    if (depth === 0 || fakeBoard.isGameOver()) {
+      return this.evaluateBoard(fakeBoard);
     }
 
-    const legalMoves = this.legalMoves(board); // Use Ai's legalMoves
+    const legalMoves = this.legalMoves(fakeBoard); // Use Ai's legalMoves
 
     if (isMaximizingPlayer) {
       let maxEval = -Infinity;
       for (let [row, column] of legalMoves) {
-        board.placePiece(column, this.color); // Simulate AI move
-        let eVal = this.minimax(board, depth - 1, false, alpha, beta);
-        this.undoMove(row, column, board); // Undo the move
+        fakeBoard.placePiece(column, this.color); // Simulate AI move
+        let eVal = this.minimax(fakeBoard, depth - 1, false, alpha, beta);
+        this.undoMove(row, column, fakeBoard); // Undo the move
         maxEval = Math.max(eVal, maxEval);
         alpha = Math.max(alpha, eVal);
         if (beta <= alpha) break; // Alpha-beta pruning
@@ -85,9 +84,9 @@ export class Ai {
     } else {
       let minEval = Infinity;
       for (let [row, column] of legalMoves) {
-        board.placePiece(column, this.opponent); // Simulate opponent move
-        let eVal = this.minimax(board, depth - 1, true, alpha, beta);
-        this.undoMove(row, column, board); // Undo the move
+        fakeBoard.placePiece(column, this.opponent); // Simulate opponent move
+        let eVal = this.minimax(fakeBoard, depth - 1, true, alpha, beta);
+        this.undoMove(row, column, fakeBoard); // Undo the move
         minEval = Math.min(eVal, minEval);
         beta = Math.min(beta, eVal);
         if (beta <= alpha) break; // Alpha-beta pruning
@@ -99,21 +98,15 @@ export class Ai {
   // Check if the opponent is about to win and adjust the score accordingly
   evaluateImmediateOpponentThreat(column) {
     const tempBoard = this.board.clone();
-    tempBoard.placePiece(column, this.opponent);
+    const [row, col] = this.helper.getNextAvailableRow(tempBoard, column); // Get the row where the piece will land
+    console.log(`EIO = row: ${row} col: ${col} column: ${column}`)
+    // Simulate placing the opponent's piece
+    if (row !== null) {
+      tempBoard.placePiece(column, this.opponent);
 
-    // Log to verify if the move is being placed correctly
-    console.log(`Simulating opponent move in column: ${column}`);
-
-    const opponentWinCombos = tempBoard.winChecker.winCombos;
-
-    for (let combo of opponentWinCombos) {
-      const opponentPieces = combo.numberOfCells(this.opponent);
-      const aiPieces = combo.numberOfCells(this.color);
-
-      // If the opponent has 3 in a row and AI has none, prioritize blocking
-      if (opponentPieces === 3 && aiPieces === 0) {
-        console.log(`Threat detected! Blocking opponent at column ${column}`);
-        return this.priorities.blocking;
+      // Now, check if this move leads to a win for the opponent
+      if (tempBoard.winChecker.isWinningMove(row, column, this.opponent)) {
+        return this.priorities.blocking; // Threat detected, block the move
       }
     }
 
@@ -121,13 +114,13 @@ export class Ai {
   }
 
 
-  // Improved board evaluation function for both offensive and defensive strategies
-  evaluateBoard(board) {
-    let score = 0;
 
-    const centerCol = Math.floor(board.cols / 2);
+  // Improved board evaluation function for both offensive and defensive strategies
+  evaluateBoard(fakeBoard) {
+    let score = 0;
+    const centerCol = Math.floor(fakeBoard.cols / 2);
     const centerBonus = 3; // Encourage center play
-    const winCombos = board.winChecker.winCombos;
+    const winCombos = fakeBoard.winChecker.winCombos;
 
     for (let combo of winCombos) {
       const aiPieces = combo.numberOfCells(this.color);
@@ -137,18 +130,18 @@ export class Ai {
       // Encourage center play
       for (let cell of combo.cells) {
         if (cell.column === centerCol) {
-          score += centerBonus;
+          score += centerBonus; // Boost for center column control
         }
       }
 
       // AI offensive strategies
       if (aiPieces === 4) score += this.priorities.winning; // AI wins
-      if (aiPieces === 3 && opponentPieces === 0) score += this.priorities.offensive; // AI has a strong chance
-      if (aiPieces === 2 && opponentPieces === 0) score += 5; // Two pieces in a row for AI
+      if (aiPieces === 3 && opponentPieces === 0) score += this.priorities.offensive * 2; // Strong chance to win
+      if (aiPieces === 2 && opponentPieces === 0) score += this.priorities.offensive; // Two in a row for AI
 
       // Defensive strategies - prioritize blocking threats
       if (opponentPieces === 3 && aiPieces === 0) {
-        score -= this.priorities.blocking; // Block opponent's potential win
+        score -= this.priorities.blocking * 2; // Increase block priority
       }
       if (opponentPieces === 2 && emptyCells && aiPieces === 0) {
         score -= this.priorities.defensive; // Block opponent's two in a row
@@ -157,6 +150,7 @@ export class Ai {
 
     return score;
   }
+
 
   // Get all legal moves available on the board
   legalMoves(board) {
@@ -186,7 +180,9 @@ export class Ai {
   }
 
   // Undo move after simulating it
-  undoMove(row, column, board) {
-    board.grid[row][column].color = ' '; // Clear the move
+  undoMove(row, column, fakeBoard) {
+    fakeBoard.grid[row][column].color = ' '; // Clear the move
   }
+
+
 }
