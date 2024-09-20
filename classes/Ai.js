@@ -110,6 +110,10 @@ export class Ai {
   evaluateImmediateOpponentThreat(column) {
     const tempBoard = this.board.clone();
     tempBoard.placePiece(column, this.opponent);
+
+    // Log to verify if the move is being placed correctly
+    console.log(`Simulating opponent move in column: ${column}`);
+
     const opponentWinCombos = tempBoard.winChecker.winCombos;
 
     for (let combo of opponentWinCombos) {
@@ -118,11 +122,14 @@ export class Ai {
 
       // If the opponent has 3 in a row and AI has none, prioritize blocking
       if (opponentPieces === 3 && aiPieces === 0) {
+        console.log(`Threat detected! Blocking opponent at column ${column}`);
         return this.priorities.blocking;
       }
     }
+
     return 0; // No immediate threat found
   }
+
 
   // Improved board evaluation function for both offensive and defensive strategies
   evaluateBoard(board) {

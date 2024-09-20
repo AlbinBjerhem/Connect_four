@@ -1,20 +1,20 @@
-import { Cell } from './Cell.js'
+import { Cell } from './Cell.js';
 
 export class WinCombo {
-
   // cells should be an array of Cells
   constructor(cells) {
     // filter cells so it only contains instances of Cell
     cells = cells.filter(x => x instanceof Cell);
+
     // if we don't have four cells in the array something is wrong
     if (cells.length !== 4) {
-      throw new Error('Each win combo must contain 4 cells.');
+      throw new Error(`Each win combo must contain exactly 4 cells. Received ${cells.length} cells.`);
     }
     this.cells = cells;
   }
 
   numberOfCells(color) {
-    // return how many cells in this WinCombo that has a certain color
+    // return how many cells in this WinCombo have a certain color
     return this.cells.filter(cell => cell.color === color).length;
   }
 
