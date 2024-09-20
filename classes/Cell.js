@@ -4,9 +4,4 @@ export class Cell {
     this.columnIndex = columnIndex;
     this.color = color || null;
   }
-
-  setColor(color) {
-    this.color = color;  // Set the color when a piece is placed
-  }
-
 }

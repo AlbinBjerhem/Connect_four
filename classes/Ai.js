@@ -42,7 +42,6 @@ export class Ai {
     // Dynamic depth: deeper search when fewer moves are left
     const remainingCells = this.board.cols * this.board.rows - this.getOccupiedCells();
     const depth = Math.min(10, remainingCells > 10 ? 7 : 10); // Dynamically adjust
-    console.log("Initial depth:", depth); // Add this to confirm the initial depth
 
     for (let [row, column] of legalMoves) {
       const boardCopy = this.board.clone();
