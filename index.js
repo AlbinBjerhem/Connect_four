@@ -1,5 +1,4 @@
 import { Board } from './classes/Board.js';
-import { Move } from './classes/Move.js';
 import { Person } from './classes/Person.js';
 import { Rules } from './classes/Rules.js';
 import { Ai } from './classes/Ai.js';
@@ -170,10 +169,8 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const move = new Move(currentPlayer, col);  // Create the move
-
     // Place the piece on the board and get the Cell where it was placed
-    const placedCell = board.placePiece(move.column, currentPlayer.color);  // Assuming placePiece now returns a Cell object
+    const placedCell = board.placePiece(col, currentPlayer.color);  // Assuming placePiece now returns a Cell object
 
     // Extract row and col from the placedCell
     const { row, col: placedCol } = placedCell;
