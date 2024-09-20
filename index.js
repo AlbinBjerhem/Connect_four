@@ -49,6 +49,8 @@ document.addEventListener("DOMContentLoaded", function () {
   nameErrorModal.appendChild(nameErrorModalContent);
   document.body.appendChild(nameErrorModal);
 
+  replayButton.addEventListener("click", resetGame);
+
   let board = new Board();
   let player1;
   let player2;
@@ -87,8 +89,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     startGame();
   });
-
-  replayButton.addEventListener("click", resetGame);
 
   quitButton.addEventListener("click", function () {
     aiLv = null
@@ -290,15 +290,16 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   }
+
+  function disableClicks() {
+    const gameBoard = document.querySelector('#board');
+    gameBoard.classList.add('no-click');
+  }
+
+  // Function to enable user interaction
+  function enableClicks() {
+    const gameBoard = document.querySelector('#board');
+    gameBoard.classList.remove('no-click');
+  }
+
 });
-
-function disableClicks() {
-  const gameBoard = document.querySelector('#board');
-  gameBoard.classList.add('no-click');
-}
-
-// Function to enable user interaction
-function enableClicks() {
-  const gameBoard = document.querySelector('#board');
-  gameBoard.classList.remove('no-click');
-}
