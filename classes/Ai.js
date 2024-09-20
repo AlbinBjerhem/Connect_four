@@ -1,5 +1,7 @@
+import { Helper } from './helper.js'
 export class Ai {
   constructor(type, board) {
+    this.helper = new Helper()
     this.name = "AI";
     this.type = type; // 'dumb' or 'smart'
     this.board = board;
@@ -17,7 +19,7 @@ export class Ai {
 
   // Simulates AI's move with a delay to mimic thinking time
   async makeBotMove() {
-    await sleep(500);
+    await this.helper.sleep(500);
     let column;
 
     if (this.type === 'dumb') {
@@ -37,7 +39,7 @@ export class Ai {
 
   // Random move for 'dumb' AI
   makeDumbBotMove() {
-    const moves = shuffleArray(this.legalMoves);
+    const moves = this.helper.shuffleArray(this.legalMoves);
     return moves[0]; // Random move
   }
 
@@ -54,12 +56,18 @@ export class Ai {
       const boardCopy = this.board.clone();
       boardCopy.placePiece(column, this.color); // Simulate move
       let score = this.minimax(boardCopy, depth - 1, false, -Infinity, Infinity);
+      console.log(`column: ${column} score: ${score}`);
+
+      // Prioritize blocking the opponent if needed
+      const opponentBlockScore = this.evaluateImmediateOpponentThreat(column);
+      score += opponentBlockScore; // Add blocking score if opponent is threatening
+      console.log("after block score: ", score)
       if (score > bestScore) {
         bestScore = score;
         bestMove = column;
       }
     }
-    console.log("legalmoves: ", JSON.stringify(legalMoves, null, 2));
+    console.table(legalMoves);
     console.log(`Best move is column ${bestMove} with score ${bestScore}`);
 
     return bestMove;
@@ -78,7 +86,7 @@ export class Ai {
       for (let [row, column] of legalMoves) {
         board.placePiece(column, this.color); // Simulate AI move
         let eVal = this.minimax(board, depth - 1, false, alpha, beta);
-        board.undoMove(row, column); // Undo the move
+        this.undoMove(row, column); // Undo the move
         maxEval = Math.max(eVal, maxEval);
         alpha = Math.max(alpha, eVal);
         if (beta <= alpha) break; // Alpha-beta pruning
@@ -89,7 +97,7 @@ export class Ai {
       for (let [row, column] of legalMoves) {
         board.placePiece(column, this.opponent); // Simulate opponent move
         let eVal = this.minimax(board, depth - 1, true, alpha, beta);
-        board.undoMove(row, column); // Undo the move
+        this.undoMove(row, column); // Undo the move
         minEval = Math.min(eVal, minEval);
         beta = Math.min(beta, eVal);
         if (beta <= alpha) break; // Alpha-beta pruning
@@ -98,7 +106,25 @@ export class Ai {
     }
   }
 
-  // Evaluate the board for AI's advantage
+  // Check if the opponent is about to win and adjust the score accordingly
+  evaluateImmediateOpponentThreat(column) {
+    const tempBoard = this.board.clone();
+    tempBoard.placePiece(column, this.opponent);
+    const opponentWinCombos = tempBoard.winChecker.winCombos;
+
+    for (let combo of opponentWinCombos) {
+      const opponentPieces = combo.numberOfCells(this.opponent);
+      const aiPieces = combo.numberOfCells(this.color);
+
+      // If the opponent has 3 in a row and AI has none, prioritize blocking
+      if (opponentPieces === 3 && aiPieces === 0) {
+        return this.priorities.blocking;
+      }
+    }
+    return 0; // No immediate threat found
+  }
+
+  // Improved board evaluation function for both offensive and defensive strategies
   evaluateBoard(board) {
     let score = 0;
 
@@ -109,22 +135,27 @@ export class Ai {
     for (let combo of winCombos) {
       const aiPieces = combo.numberOfCells(this.color);
       const opponentPieces = combo.numberOfCells(this.opponent);
-      let emptyCells = combo.cells.filter(cell => cell.color === ' ' || cell.color === null).length > 0;
+      const emptyCells = combo.cells.filter(cell => cell.color === ' ' || cell.color === null).length > 0;
 
+      // Encourage center play
       for (let cell of combo.cells) {
         if (cell.column === centerCol) {
           score += centerBonus;
         }
       }
 
-      // Award AI chains
-      if (aiPieces === 4) score += 100; // Win
-      if (aiPieces === 3 && opponentPieces === 0) score += 10;
-      if (aiPieces === 2 && opponentPieces === 0) score += 5;
+      // AI offensive strategies
+      if (aiPieces === 4) score += this.priorities.winning; // AI wins
+      if (aiPieces === 3 && opponentPieces === 0) score += this.priorities.offensive; // AI has a strong chance
+      if (aiPieces === 2 && opponentPieces === 0) score += 5; // Two pieces in a row for AI
 
-      // Penalize opponent's advantage
-      if (opponentPieces === 3 && aiPieces === 0) score -= 50; // Opponent close to win
-      if (opponentPieces === 2 && emptyCells) score -= 10;
+      // Defensive strategies - prioritize blocking threats
+      if (opponentPieces === 3 && aiPieces === 0) {
+        score -= this.priorities.blocking; // Block opponent's potential win
+      }
+      if (opponentPieces === 2 && emptyCells && aiPieces === 0) {
+        score -= this.priorities.defensive; // Block opponent's two in a row
+      }
     }
 
     return score;
@@ -161,18 +192,4 @@ export class Ai {
   undoMove(row, column) {
     this.board.grid[row][column].color = ' '; // Clear the move
   }
-}
-
-// Helper function to delay AI's move
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// Shuffle an array (used for dumb AI)
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
 }
