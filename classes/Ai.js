@@ -37,12 +37,6 @@ export class Ai {
     }
   }
 
-  // Random move for 'dumb' AI
-  makeDumbBotMove() {
-    const moves = this.helper.shuffleArray(this.legalMoves);
-    return moves[0]; // Random move
-  }
-
   // Strategic move for 'smart' AI with minimax and alpha-beta pruning
   makeSmartBotMove() {
     let bestMove = null;
