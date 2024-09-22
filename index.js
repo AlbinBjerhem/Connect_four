@@ -262,7 +262,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function findAvailableRow(col) {
     for (let row = board.rows - 1; row >= 0; row--) {
-      if (board.grid[row][col] === null) {
+      if (board.grid[row][col].color === null || board.grid[row][col].color === " ") {
         return row;
       }
     }

@@ -22,6 +22,11 @@ export class Ai {
     await this.helper.sleep(500);
     let column;
 
+    if (this.type === 'dumb') {
+      column = this.makeDumbBotMove();
+      console.log(`dumb: ${column}`)
+    }
+
     if (this.type === 'smart') {
       column = this.makeSmartBotMove();
     }
@@ -31,6 +36,16 @@ export class Ai {
     } else {
       return null; // No move found
     }
+  }
+
+  // Slumpmässigt val av drag för den enkla AI:n
+  makeDumbBotMove() {
+    const legalMoves = this.legalMoves(this.board);
+    console.log("Legal moves:", legalMoves);
+    const moves = this.helper.shuffleArray(legalMoves);
+    console.log("Shuffled moves:", moves);
+    const [row, column] = moves[0]; // Get the first random move
+    return column; // Return the column
   }
 
   // Strategic move for 'smart' AI with minimax and alpha-beta pruning

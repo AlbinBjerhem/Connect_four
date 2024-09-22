@@ -21,9 +21,8 @@ export class Board {
       throw new Error(`Column index ${col} is out of bounds.`);
     }
     const cell = this.grid[0][col];
-    return cell.color !== null;  // Check if the top cell in the column is filled
+    return cell.color !== null && cell.color !== " ";  // Check if the top cell in the column is filled
   }
-
 
   // Place a piece in the given column
   placePiece(col, playerColor) {
