@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Place the piece on the board and get the Cell where it was placed
-    const placedCell = board.placePiece(col, currentPlayer.color);  // Assuming placePiece now returns a Cell object
+    const placedCell = await board.placePiece(col, currentPlayer.color);  // Assuming placePiece now returns a Cell object
 
     // Extract row and col from the placedCell
     const { row, col: placedCol } = placedCell;
@@ -300,8 +300,11 @@ document.addEventListener("DOMContentLoaded", function () {
     board = new Board();
     if (aiLevel.value === 'external') {
       player1 = new External()
+      player2 = new Ai("smart", board)
+    } else {
+      player2 = new Ai(aiLv, board)
     }
-    player2 = new Ai(aiLv, board)
+
     gameActive = true;
     enableClicks()
     currentPlayer = player1;
