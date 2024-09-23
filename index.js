@@ -103,13 +103,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  async function loopUntilGameEnds() {
-    while (gameActive) {
-      await handleMove();  // Wait for each move to complete before continuing
-    }
-  }
-
-
   quitButton.addEventListener("click", function () {
     aiLv = null
     board = new Board();
@@ -128,43 +121,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelector('.scoreboard').style.display = 'none';
   });
-
-  function renderBoard() {
-    boardElement.innerHTML = '';
-    for (let r = 0; r < board.rows; r++) {
-      for (let c = 0; c < board.cols; c++) {
-        const cell = document.createElement("div");
-        cell.classList.add("cell");
-        cell.dataset.row = r;
-        cell.dataset.col = c;
-        boardElement.appendChild(cell);
-      }
-    }
-  }
-
-  function startGame() {
-    gameActive = true;
-    currentPlayer = player1;
-    enableClicks()
-    statusDisplay.style.display = "block";
-    statusDisplay.textContent = `${currentPlayer.name}'s turn`;
-
-    boardElement.innerHTML = '';
-    for (let r = 0; r < board.rows; r++) {
-      for (let c = 0; c < board.cols; c++) {
-        const cell = document.createElement("div");
-        cell.classList.add("cell");
-        cell.dataset.row = r;
-        cell.dataset.col = c;
-
-        cell.addEventListener("mouseover", handleHover);
-        cell.addEventListener("mouseout", removeHover);
-        cell.addEventListener("click", handleMove);
-
-        boardElement.appendChild(cell);
-      }
-    }
-  }
 
   async function handleMove(event) {
     if (!gameActive) return;  // If the game is not active, do nothing
@@ -256,6 +212,42 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  function renderBoard() {
+    boardElement.innerHTML = '';
+    for (let r = 0; r < board.rows; r++) {
+      for (let c = 0; c < board.cols; c++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.row = r;
+        cell.dataset.col = c;
+        boardElement.appendChild(cell);
+      }
+    }
+  }
+
+  function startGame() {
+    gameActive = true;
+    currentPlayer = player1;
+    enableClicks()
+    statusDisplay.style.display = "block";
+    statusDisplay.textContent = `${currentPlayer.name}'s turn`;
+
+    boardElement.innerHTML = '';
+    for (let r = 0; r < board.rows; r++) {
+      for (let c = 0; c < board.cols; c++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.row = r;
+        cell.dataset.col = c;
+
+        cell.addEventListener("mouseover", handleHover);
+        cell.addEventListener("mouseout", removeHover);
+        cell.addEventListener("click", handleMove);
+
+        boardElement.appendChild(cell);
+      }
+    }
+  }
 
   function handleHover(event) {
     if (!gameActive) return;
@@ -298,12 +290,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function resetGame() {
     board = new Board();
-    if (aiLevel.value === 'external') {
-      player1 = new External()
-      player2 = new Ai("smart", board)
-    } else {
-      player2 = new Ai(aiLv, board)
-    }
 
     gameActive = true;
     enableClicks()
@@ -322,6 +308,12 @@ document.addEventListener("DOMContentLoaded", function () {
         cell.addEventListener("click", handleMove);
       }
     }
+    if (aiLevel.value === 'external') {
+      player2 = new Ai("smart", board)
+      loopUntilGameEnds()
+    } else {
+      player2 = new Ai(aiLv, board)
+    }
   }
 
   function disableClicks() {
@@ -333,6 +325,12 @@ document.addEventListener("DOMContentLoaded", function () {
   function enableClicks() {
     const gameBoard = document.querySelector('#board');
     gameBoard.classList.remove('no-click');
+  }
+
+  async function loopUntilGameEnds() {
+    while (gameActive) {
+      await handleMove();  // Wait for each move to complete before continuing
+    }
   }
 
 });
