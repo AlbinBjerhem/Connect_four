@@ -67,7 +67,8 @@ document.addEventListener("DOMContentLoaded", function () {
     playerModal.style.display = "flex";
   });
   startGameButton.addEventListener("click", function () {
-    if (aiLevel === 'external') {
+    if (aiLevel.value === 'external') {
+      console.log("external")
       player1 = new External();
       player2 = new Ai('smart', board);
 
@@ -96,6 +97,9 @@ document.addEventListener("DOMContentLoaded", function () {
     quitButton.style.display = "block";
 
     startGame();
+    if (aiLevel.value === 'external') {
+      while (gameActive) { handleMove() }
+    }
   });
 
   quitButton.addEventListener("click", function () {
@@ -160,8 +164,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (currentPlayer === player1) {
       currentPlayer.color = 'red'
-      if (player1 === External) {
-        col = await player1.getMoveFromExternalAI(1, this.board)
+      if (aiLevel.value === "external") {
+        col = await player1.getMoveFromExternalAI(1, board)
       } else {
         col = parseInt(event.target.dataset.col);  // No need to await parseInt
       }
@@ -283,6 +287,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function resetGame() {
     board = new Board();
+    if (aiLevel.value === 'external') {
+      player1 = new External()
+    }
     player2 = new Ai(aiLv, board)
     gameActive = true;
     enableClicks()
