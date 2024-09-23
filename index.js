@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     startGame();
     if (aiLevel.value === 'external') {
-      while (gameActive) { handleMove() }
+      handleMove();
     }
   });
 
@@ -163,17 +163,20 @@ document.addEventListener("DOMContentLoaded", function () {
     let col;
 
     if (currentPlayer === player1) {
-      currentPlayer.color = 'red'
+      currentPlayer.color = 'red';
       if (aiLevel.value === "external") {
-        col = await player1.getMoveFromExternalAI(1, board)
+        col = await player1.getMoveFromExternalAI(1, board.grid);  // Assuming level 1 AI
+        if (col === null) {
+          console.error('External AI failed to return a valid move.');
+          return;  // You can handle this case better, such as retrying or notifying the user
+        }
       } else {
         col = parseInt(event.target.dataset.col);  // No need to await parseInt
       }
-      console.log("Player move, column:", col);
-      disableClicks();  // Disable player clicks after making a move
+      disableClicks();  // Disable player clicks during AI move
     } else if (currentPlayer === player2) {
       disableClicks();  // Disable player clicks during AI move
-      currentPlayer.color = 'yellow'
+      currentPlayer.color = 'yellow';
       col = await player2.makeBotMove();  // Get the AI's move
       console.log("AI move, column:", col);
     }
