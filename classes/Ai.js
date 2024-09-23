@@ -77,8 +77,6 @@ export class Ai {
     return bestMove;
   }
 
-
-
   // Minimax with alpha-beta pruning, using Ai's legalMoves instead of board.getLegalMoves()
   minimax(fakeBoard, depth, isMaximizingPlayer, alpha, beta) {
     if (depth === 0 || fakeBoard.isGameOver()) {

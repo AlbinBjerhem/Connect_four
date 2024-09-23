@@ -2,6 +2,7 @@ import { Board } from './classes/Board.js';
 import { Person } from './classes/Person.js';
 import { Rules } from './classes/Rules.js';
 import { Ai } from './classes/Ai.js';
+import { External } from './classes/external.js'
 
 document.addEventListener("DOMContentLoaded", function () {
   const playGameButton = document.getElementById("play-game");
@@ -65,21 +66,28 @@ document.addEventListener("DOMContentLoaded", function () {
   playGameButton.addEventListener("click", function () {
     playerModal.style.display = "flex";
   });
-
   startGameButton.addEventListener("click", function () {
-    const player1Name = player1Input.value.trim() || "Player 1";
-    aiLv = aiLevel.value;
+    if (aiLevel === 'external') {
+      player1 = new External();
+      player2 = new Ai('smart', board);
 
-    if (player1Name === 'AI') {
-      nameErrorModal.style.display = 'flex';
-      return;
+      player1NameDisplay.textContent = player1.name;
+      player2NameDisplay.textContent = player2.name;
+    } else {
+      const player1Name = player1Input.value.trim() || "Player 1";
+      aiLv = aiLevel.value;
+
+      if (player1Name === 'AI') {
+        nameErrorModal.style.display = 'flex';
+        return;
+      }
+
+      player1 = new Person(player1Name);
+      player2 = new Ai(aiLv, board);
+
+      player1NameDisplay.textContent = player1Name;
+      player2NameDisplay.textContent = player2.name;
     }
-
-    player1 = new Person(player1Name);
-    player2 = new Ai(aiLv, board);
-
-    player1NameDisplay.textContent = player1Name;
-    player2NameDisplay.textContent = player2.name;
 
     document.querySelector('.scoreboard').style.display = 'flex';
 
@@ -152,10 +160,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (currentPlayer === player1) {
       currentPlayer.color = 'red'
-      col = parseInt(event.target.dataset.col);  // No need to await parseInt
+      if (player1 === External) {
+        col = await player1.getMoveFromExternalAI(1, this.board)
+      } else {
+        col = parseInt(event.target.dataset.col);  // No need to await parseInt
+      }
       console.log("Player move, column:", col);
       disableClicks();  // Disable player clicks after making a move
-    } else {
+    } else if (currentPlayer === player2) {
       disableClicks();  // Disable player clicks during AI move
       currentPlayer.color = 'yellow'
       col = await player2.makeBotMove();  // Get the AI's move
