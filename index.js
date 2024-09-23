@@ -66,7 +66,8 @@ document.addEventListener("DOMContentLoaded", function () {
   playGameButton.addEventListener("click", function () {
     playerModal.style.display = "flex";
   });
-  startGameButton.addEventListener("click", function () {
+
+  startGameButton.addEventListener("click", async function () {
     if (aiLevel.value === 'external') {
       console.log("external")
       player1 = new External();
@@ -98,9 +99,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     startGame();
     if (aiLevel.value === 'external') {
-      handleMove();
+      await loopUntilGameEnds();
     }
   });
+
+  async function loopUntilGameEnds() {
+    while (gameActive) {
+      await handleMove();  // Wait for each move to complete before continuing
+    }
+  }
+
 
   quitButton.addEventListener("click", function () {
     aiLv = null
@@ -165,7 +173,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (currentPlayer === player1) {
       currentPlayer.color = 'red';
       if (aiLevel.value === "external") {
-        col = await player1.getMoveFromExternalAI(1, board.grid);  // Assuming level 1 AI
+        col = await player1.getMoveFromExternalAI(10, board.grid);  // Assuming level 1 AI
         if (col === null) {
           console.error('External AI failed to return a valid move.');
           return;  // You can handle this case better, such as retrying or notifying the user
