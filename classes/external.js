@@ -6,7 +6,7 @@ export class External {
   async getMoveFromExternalAI(aiLevel = 1, board) {
     const serializedBoard = this.serializeBoard(board);  // Convert board to string format
     try {
-      let response = await fetch(`https://ludolab.net/solve/connect4?level=${aiLevel}&position=${serializedBoard}`);
+      let response = await fetch(`/solve/connect4?level=${aiLevel}&position=${serializedBoard}`);
       console.log(response)
       let data = await response.json();
 
