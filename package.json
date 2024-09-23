@@ -6,7 +6,8 @@
   "scripts": {
     "test-ui": "cypress open --browser chrome",
     "test": "cypress run --browser chrome",
-    "make-steps": "node _auto-generate-step-definitions.js"
+    "make-steps": "node _auto-generate-step-definitions.js",
+    "start": "vite"
   },
   "cypress-cucumber-preprocessor": {
     "json": {
@@ -105,7 +106,6 @@
     "es-errors": "^1.3.0",
     "es-module-lexer": "^1.5.4",
     "esbuild": "^0.14.54",
-    "esbuild-windows-64": "^0.14.54",
     "escalade": "^3.2.0",
     "escape-string-regexp": "^1.0.5",
     "eslint-scope": "^5.1.1",
@@ -286,6 +286,7 @@
     "wrappy": "^1.0.2",
     "yallist": "^3.1.1",
     "yaml": "^1.10.2",
-    "yauzl": "^2.10.0"
+    "yauzl": "^2.10.0",
+    "vite": "^5.4.1"
   }
 }
