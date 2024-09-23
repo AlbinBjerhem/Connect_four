@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   columnFullModal.classList.add('modal');
   columnFullModalContent.classList.add('modal-content');
-  columnFullModalContent.innerHTML = '<p>Column is full, choose another column</p>';
+  columnFullModalContent.innerHTML = `<p> Column is full, choose another column</p>`;
   closeModalButton.textContent = 'OK';
   closeModalButton.addEventListener('click', function () {
     columnFullModal.style.display = 'none';
@@ -50,7 +50,6 @@ document.addEventListener("DOMContentLoaded", function () {
   nameErrorModal.appendChild(nameErrorModalContent);
   document.body.appendChild(nameErrorModal);
 
-  replayButton.addEventListener("click", resetGame);
 
   let board = new Board();
   let player1;
@@ -62,6 +61,8 @@ document.addEventListener("DOMContentLoaded", function () {
   let player2Score = 0;
 
   renderBoard();
+
+  replayButton.addEventListener("click", resetGame);
 
   playGameButton.addEventListener("click", function () {
     playerModal.style.display = "flex";
@@ -104,6 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   quitButton.addEventListener("click", function () {
+    gameActive = false
     aiLv = null
     board = new Board();
     renderBoard();
@@ -129,7 +131,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (currentPlayer === player1) {
       currentPlayer.color = 'red';
       if (aiLevel.value === "external") {
-        col = await player1.getMoveFromExternalAI(10, board.grid);  // Assuming level 1 AI
+        disableClicks();
+        col = await player1.getMoveFromExternalAI(1, board.grid);  // Assuming level 1 AI
         if (col === null) {
           console.error('External AI failed to return a valid move.');
           return;  // You can handle this case better, such as retrying or notifying the user

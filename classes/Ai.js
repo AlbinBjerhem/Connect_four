@@ -19,11 +19,11 @@ export class Ai {
 
   // Simulates AI's move with a delay to mimic thinking time
   async makeBotMove() {
-    await this.helper.sleep(500);
+    await this.helper.sleep(1000);
     let column;
 
     if (this.type === 'dumb') {
-      column = this.makeDumbBotMove();
+      column = await this.makeDumbBotMove();
       console.log(`dumb: ${column}`)
     }
 

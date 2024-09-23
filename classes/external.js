@@ -1,12 +1,16 @@
+import { Helper } from "./helper";
+
 export class External {
   constructor() {
     this.name = 'external'
+    this.helper = new Helper()
   }
 
   async getMoveFromExternalAI(aiLevel = 1, board) {
-    const serializedBoard = this.serializeBoard(board);  // Convert board to string format
+    await this.helper.sleep(1000);
+    //    const serializedBoard = await this.serializeBoard(board);  // Convert board to string format
     try {
-      let response = await fetch(`/solve/connect4?level=${aiLevel}&position=${serializedBoard}`);
+      let response = await fetch(`/solve/connect4?level=${aiLevel}&position=${board}`);
       console.log(response)
       let data = await response.json();
 
