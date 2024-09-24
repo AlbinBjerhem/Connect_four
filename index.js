@@ -59,6 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let gameActive = false;
   let player1Score = 0;
   let player2Score = 0;
+  let gameState = '';
 
   renderBoard();
 
@@ -112,6 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     player1Score = 0;
     player2Score = 0;
+    gameState = ''
 
     player1ScoreDisplay.textContent = player1Score;
     player2ScoreDisplay.textContent = player2Score;
@@ -128,24 +130,28 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!gameActive) return;  // If the game is not active, do nothing
     let col;
 
-    if (currentPlayer === player1) {
+    if (await currentPlayer === player1) {
       currentPlayer.color = 'red';
-      if (aiLevel.value === "external") {
+      if (await aiLevel.value === "external") {
         disableClicks();
-        col = await player1.getMoveFromExternalAI(1, board.grid);  // Assuming level 1 AI
+        col = await player1.getMoveFromExternalAI(1, gameState);  // Assuming level 1 AI
+        gameState += (col + 1).toString();
+        console.log("external move, column:", col);
         if (col === null) {
           console.error('External AI failed to return a valid move.');
           return;  // You can handle this case better, such as retrying or notifying the user
         }
       } else {
         col = parseInt(event.target.dataset.col);  // No need to await parseInt
+        console.log("player move, column:", col);
       }
       disableClicks();  // Disable player clicks during AI move
-    } else if (currentPlayer === player2) {
+    } else if (await currentPlayer === player2) {
       disableClicks();  // Disable player clicks during AI move
       currentPlayer.color = 'yellow';
       col = await player2.makeBotMove();  // Get the AI's move
       console.log("AI move, column:", col);
+      gameState += (col + 1).toString();
     }
 
     // Check if the selected column is full
@@ -156,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Place the piece on the board and get the Cell where it was placed
-    const placedCell = await board.placePiece(col, currentPlayer.color);  // Assuming placePiece now returns a Cell object
+    const placedCell = board.placePiece(col, currentPlayer.color);  // Assuming placePiece now returns a Cell object
 
     // Extract row and col from the placedCell
     const { row, col: placedCol } = placedCell;
@@ -201,18 +207,20 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Switch turns
-    currentPlayer = currentPlayer === player1 ? player2 : player1;
+    currentPlayer = await currentPlayer === player1 ? player2 : player1;
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
 
-    // Handle AI move with a slight delay (for animation purposes)
-    if (currentPlayer === player2) {
-      setTimeout(async () => {
-        await handleMove();  // AI makes its move
-        enableClicks();  // Re-enable clicks after AI has made its move
-      }, 500);  // AI move delay
-    } else {
-      enableClicks();  // Re-enable clicks for the player
+    if (await aiLevel.value !== "external") {
+      if (await currentPlayer === player2) {
+        setTimeout(async () => {
+          await handleMove();  // AI makes its move
+          enableClicks();  // Re-enable clicks after AI has made its move
+        }, 500);  // AI move delay
+      } else {
+        enableClicks();  // Re-enable clicks for the player
+      }
     }
+    // Handle AI move with a slight delay (for animation purposes)
   }
 
   function renderBoard() {
@@ -298,6 +306,7 @@ document.addEventListener("DOMContentLoaded", function () {
     enableClicks()
     currentPlayer = player1;
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
+    gameState = ''
 
     replayButton.style.display = "none";
 

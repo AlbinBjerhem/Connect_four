@@ -18,7 +18,8 @@ export class Board {
   // Check if a column is full
   isColumnFull(col) {
     if (col < 0 || col >= this.cols) {
-      throw new Error(`Column index ${col} is out of bounds.`);
+      console.error(`Column index ${col} is out of bounds.`);
+      return true;  // Treat out-of-bounds columns as full to prevent invalid moves
     }
     const cell = this.grid[0][col];
     return cell.color !== null && cell.color !== " ";  // Check if the top cell in the column is filled

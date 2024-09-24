@@ -62,7 +62,7 @@ export class Ai {
       const boardCopy = this.board.clone();
       boardCopy.placePiece(column, this.color); // Simulate move
       let score = this.minimax(boardCopy, depth - 1, false, -Infinity, Infinity); // Pass depth - 1 here
-      console.log(`row: ${row}, column: ${column}, score: ${score}`);
+      //      console.log(`row: ${row}, column: ${column}, score: ${score}`);
 
       const opponentBlockScore = this.evaluateImmediateOpponentThreat(column);
       score += opponentBlockScore;
@@ -72,8 +72,6 @@ export class Ai {
         bestMove = column;
       }
     }
-
-    console.log(`Best move is column ${bestMove} with score ${bestScore}`);
     return bestMove;
   }
 
