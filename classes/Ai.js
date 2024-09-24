@@ -1,11 +1,12 @@
 import { Helper } from './helper.js'
 export class Ai {
-  constructor(type, board) {
+  constructor(level, board) {
     this.helper = new Helper()
-    this.name = "AI";
-    this.type = type; // 'dumb' or 'smart'
+    this.name = `${level} AI`;
+    this.level = level; // 'dumb' or 'smart'
+    this.type = 'ai'
     this.board = board;
-    this.color = 'yellow'; // AI's color
+    this.myself = 'yellow'; // AI's color
     this.opponent = 'red'; // Opponent's color
 
     // Define AI's priorities
@@ -22,12 +23,12 @@ export class Ai {
     await this.helper.sleep(1000);
     let column;
 
-    if (this.type === 'dumb') {
+    if (this.level === 'dumb') {
       column = await this.makeDumbBotMove();
       console.log(`dumb: ${column}`)
     }
 
-    if (this.type === 'smart') {
+    if (this.level === 'smart') {
       column = this.makeSmartBotMove();
     }
 
@@ -60,7 +61,7 @@ export class Ai {
 
     for (let [row, column] of legalMoves) {
       const boardCopy = this.board.clone();
-      boardCopy.placePiece(column, this.color); // Simulate move
+      boardCopy.placePiece(column, this.myself); // Simulate move
       let score = this.minimax(boardCopy, depth - 1, false, -Infinity, Infinity); // Pass depth - 1 here
       //      console.log(`row: ${row}, column: ${column}, score: ${score}`);
 
@@ -87,7 +88,7 @@ export class Ai {
     if (isMaximizingPlayer) {
       let maxEval = -Infinity;
       for (let [row, column] of legalMoves) {
-        fakeBoard.placePiece(column, this.color); // Simulate AI move
+        fakeBoard.placePiece(column, this.myself); // Simulate AI move
         let eVal = this.minimax(fakeBoard, depth - 1, false, alpha, beta);
         this.undoMove(row, column, fakeBoard); // Undo the move
         maxEval = Math.max(eVal, maxEval);
@@ -116,7 +117,7 @@ export class Ai {
     const winCombos = fakeBoard.winChecker.winCombos;
 
     for (let combo of winCombos) {
-      const aiPieces = combo.numberOfCells(this.color);
+      const aiPieces = combo.numberOfCells(this.myself);
       const opponentPieces = combo.numberOfCells(this.opponent);
       const emptyCells = combo.cells.filter(cell => cell.color === ' ' || cell.color === null).length > 0;
 

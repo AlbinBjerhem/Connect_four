@@ -32,11 +32,22 @@
       <h2>Enter Player Names</h2>
       <label for="player1">Player 1:</label>
       <input type="text" id="player1" placeholder="Enter Player 1 Name">
-      <label for="ai">AI:</label>
-      <select id="ai-level">
-        <option value="dumb">Dumb</option>
-        <option value="smart">Smart</option>
-        <option value="external">External</option>
+      <label for="player1Type">Player 1 Type:</label>
+      <select id="player1Type">
+        <option value="human">Human</option>
+        <option value="dumb">Dumb Bot</option>
+        <option value="smart">Smart Bot</option>
+        <option value="external">External AI</option>
+      </select>
+
+      <label for="player2">Player 2:</label>
+      <input type="text" id="player2" placeholder="Enter Player 2 Name">
+      <label for="player2Type">Player 2 Type:</label>
+      <select id="player2Type">
+        <option value="human">Human</option>
+        <option value="dumb">Dumb Bot</option>
+        <option value="smart">Smart Bot</option>
+        <option value="external">External AI</option>
       </select>
       <button id="startGameButton">Start Game</button>
     </div>

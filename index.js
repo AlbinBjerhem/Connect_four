@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const startGameButton = document.getElementById("startGameButton");
   const playerModal = document.getElementById("playerModal");
   const player1Input = document.getElementById("player1");
+  const player2Input = document.getElementById("player2");
   const aiLevel = document.getElementById("ai-level");
   const replayButton = document.getElementById("replay-game");
   const quitButton = document.getElementById("quit-game");
@@ -54,12 +55,12 @@ document.addEventListener("DOMContentLoaded", function () {
   let board = new Board();
   let player1;
   let player2;
-  let aiLv = null
   let currentPlayer;
   let gameActive = false;
   let player1Score = 0;
   let player2Score = 0;
   let gameState = '';
+
 
   renderBoard();
 
@@ -67,30 +68,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
   playGameButton.addEventListener("click", function () {
     playerModal.style.display = "flex";
+
   });
 
+
   startGameButton.addEventListener("click", async function () {
-    if (aiLevel.value === 'external') {
-      player1 = new External();
-      player2 = new Ai('smart', board);
+    const player1Type = document.getElementById("player1Type").value;
+    const player2Type = document.getElementById("player2Type").value;
 
-      player1NameDisplay.textContent = player1.name;
-      player2NameDisplay.textContent = player2.name;
-    } else {
-      const player1Name = player1Input.value.trim() || "Player 1";
-      aiLv = aiLevel.value;
+    player1 = valuetypes(player1Type, 1)
+    player2 = valuetypes(player2Type, 2)
 
-      if (player1Name === 'AI') {
-        nameErrorModal.style.display = 'flex';
-        return;
-      }
-
-      player1 = new Person(player1Name);
-      player2 = new Ai(aiLv, board);
-
-      player1NameDisplay.textContent = player1Name;
-      player2NameDisplay.textContent = player2.name;
+    if (player1.name === player2.name) {
+      player2.name = player2.name + '2'
     }
+
+    player1NameDisplay.textContent = player1.name;
+    player2NameDisplay.textContent = player2.name;
 
     document.querySelector('.scoreboard').style.display = 'flex';
 
@@ -99,14 +93,14 @@ document.addEventListener("DOMContentLoaded", function () {
     quitButton.style.display = "block";
 
     startGame();
-    if (aiLevel.value === 'external') {
-      await loopUntilGameEnds();
+
+    if ((player1.type === 'external' || player1.type === 'ai')) {
+      await handleMove();
     }
   });
 
   quitButton.addEventListener("click", function () {
     gameActive = false
-    aiLv = null
     board = new Board();
     renderBoard();
 
@@ -128,30 +122,27 @@ document.addEventListener("DOMContentLoaded", function () {
   async function handleMove(event) {
     if (!gameActive) return;  // If the game is not active, do nothing
     let col;
+    player1.color = 'red'
+    player2.color = 'yellow'
 
-    if (await currentPlayer === player1) {
-      currentPlayer.color = 'red';
-      if (await aiLevel.value === "external") {
-        disableClicks();
-        col = await player1.getMoveFromExternalAI(1, gameState);  // Assuming level 1 AI
-        gameState += (col + 1).toString();
-        console.log("external move, column:", col);
-        if (col === null) {
-          console.error('External AI failed to return a valid move.');
-          return;  // You can handle this case better, such as retrying or notifying the user
-        }
-      } else {
+    switch (currentPlayer.type) {
+      case 'human':
         col = parseInt(event.target.dataset.col);  // No need to await parseInt
         console.log("player move, column:", col);
-      }
-      disableClicks();  // Disable player clicks during AI move
-    } else if (await currentPlayer === player2) {
-      disableClicks();  // Disable player clicks during AI move
-      currentPlayer.color = 'yellow';
-      col = await player2.makeBotMove();  // Get the AI's move
-      console.log("AI move, column:", col);
-      gameState += (col + 1).toString();
+        gameState += (col + 1).toString();
+        break;
+      case 'external':
+        col = await currentPlayer.getMoveFromExternalAI(1, gameState);  // Assuming level 1 AI
+        console.log("external move, column:", col);
+        gameState += (col + 1).toString();
+        break;
+      case 'ai':
+        col = await currentPlayer.makeBotMove();  // Get the AI's move
+        console.log("AI move, column:", col);
+        gameState += (col + 1).toString();
     }
+
+    disableClicks();
 
     // Check if the selected column is full
     if (board.isColumnFull(col)) {
@@ -159,6 +150,8 @@ document.addEventListener("DOMContentLoaded", function () {
       enableClicks();  // Re-enable clicks so the player can try another column
       return;
     }
+
+    //    currentPlayer.color = currentPlayer.color = 'red' ? 'yellow' : 'red';
 
     // Place the piece on the board and get the Cell where it was placed
     const placedCell = board.placePiece(col, currentPlayer.color);  // Assuming placePiece now returns a Cell object
@@ -208,18 +201,22 @@ document.addEventListener("DOMContentLoaded", function () {
     // Switch turns
     currentPlayer = await currentPlayer === player1 ? player2 : player1;
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
-
-    if (await aiLevel.value !== "external") {
-      if (await currentPlayer === player2) {
+    console.log("här1")
+    if ((player1.type !== 'human' && player2.type !== 'human') || (player1.type === 'human' || player2.type === 'human')) {
+      console.log("här2")
+      if ((currentPlayer.type === 'ai') || (currentPlayer.type === 'external')) {
+        console.log("här3")
         setTimeout(async () => {
           await handleMove();  // AI makes its move
           enableClicks();  // Re-enable clicks after AI has made its move
         }, 500);  // AI move delay
-      } else {
-        enableClicks();  // Re-enable clicks for the player
       }
     }
     // Handle AI move with a slight delay (for animation purposes)
+    if ((player1.type === 'external' || player1.type === 'ai') && (player2.type === 'external' || player2.type === 'ai')) {
+      await loopUntilGameEnds();
+    }
+    enableClicks();
   }
 
   function renderBoard() {
@@ -319,11 +316,16 @@ document.addEventListener("DOMContentLoaded", function () {
         cell.addEventListener("click", handleMove);
       }
     }
-    if (aiLevel.value === 'external') {
-      player2 = new Ai("smart", board)
-      loopUntilGameEnds()
-    } else {
-      player2 = new Ai(aiLv, board)
+
+    if (player1.type === 'ai') {
+      player1 = ai(player1.level)
+    }
+    if (player2.type === 'ai') {
+      player2 = ai(player2.level)
+    }
+
+    if ((player1.type === 'external' || player1.type === 'ai')) {
+      handleMove();
     }
   }
 
@@ -342,6 +344,45 @@ document.addEventListener("DOMContentLoaded", function () {
     while (gameActive) {
       await handleMove();  // Wait for each move to complete before continuing
     }
+  }
+
+  function human(i) {
+    let player
+    if (i === 1) {
+      player = new Person(player1Input);
+    } else if (i === 2) {
+      player = new Person(player2Input);
+    }
+    return player;
+  }
+
+  function ai(level) {
+    let player = new Ai(level, board);
+    return player;
+  }
+
+  function external() {
+    let player = new External();
+    return player;
+  }
+
+  function valuetypes(type, i) {
+    let player = ''
+    switch (type) {
+      case 'human':
+        player = human(i);
+        break;
+      case 'dumb':
+        player = ai('dumb');
+        break;
+      case 'smart':
+        player = ai('smart');
+        break;
+      case 'external':
+        player = external();
+        break;
+    }
+    return player;
   }
 
 });

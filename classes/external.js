@@ -3,6 +3,7 @@ import { Helper } from "./helper";
 export class External {
   constructor() {
     this.name = 'external'
+    this.type = 'external'
     this.helper = new Helper()
   }
 
