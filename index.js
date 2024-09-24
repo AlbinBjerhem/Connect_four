@@ -71,7 +71,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   startGameButton.addEventListener("click", async function () {
     if (aiLevel.value === 'external') {
-      console.log("external")
       player1 = new External();
       player2 = new Ai('smart', board);
 
