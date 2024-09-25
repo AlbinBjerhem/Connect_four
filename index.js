@@ -1,6 +1,6 @@
 import { Board } from './classes/Board.js';
 import { Rules } from './classes/Rules.js';
-import { valuetypes, disableClicks, enableClicks } from './function.js'
+import { valuetypes, ai, disableClicks, enableClicks } from './function.js'
 
 document.addEventListener("DOMContentLoaded", function () {
   const playGameButton = document.getElementById("play-game");
@@ -311,10 +311,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (player1.type === 'ai') {
-      player1 = ai(player1.level)
+      player1 = ai(player1.level, board)
     }
     if (player2.type === 'ai') {
-      player2 = ai(player2.level)
+      player2 = ai(player2.level, board)
     }
 
     if ((player1.type === 'external' || player1.type === 'ai')) {

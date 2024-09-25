@@ -34,7 +34,7 @@ function human(i) {
   return player;
 }
 
-function ai(level, board) {
+export function ai(level, board) {
   let player = new Ai(level, board);
   return player;
 }
