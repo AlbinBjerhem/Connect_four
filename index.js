@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const playerModal = document.getElementById("playerModal");
   const player1Input = document.getElementById("player1");
   const player2Input = document.getElementById("player2");
-  const aiLevel = document.getElementById("ai-level");
   const replayButton = document.getElementById("replay-game");
   const quitButton = document.getElementById("quit-game");
   const statusDisplay = document.getElementById("status");
@@ -61,7 +60,6 @@ document.addEventListener("DOMContentLoaded", function () {
   let player2Score = 0;
   let gameState = '';
 
-
   renderBoard();
 
   replayButton.addEventListener("click", resetGame);
@@ -70,7 +68,6 @@ document.addEventListener("DOMContentLoaded", function () {
     playerModal.style.display = "flex";
 
   });
-
 
   startGameButton.addEventListener("click", async function () {
     const player1Type = document.getElementById("player1Type").value;
@@ -199,6 +196,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Switch turns
     currentPlayer = await currentPlayer === player1 ? player2 : player1;
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
+
     if (player1.type === 'human' || player2.type === 'human') {
       if ((currentPlayer.type === 'ai') || (currentPlayer.type === 'external')) {
         setTimeout(async () => {
@@ -207,7 +205,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 500);  // AI move delay
       }
     }
-    // Handle AI move with a slight delay (for animation purposes)
     if ((player1.type === 'external' || player1.type === 'ai') && (player2.type === 'external' || player2.type === 'ai')) {
       await loopUntilGameEnds();
     }
