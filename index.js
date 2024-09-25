@@ -199,13 +199,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // Switch turns
     currentPlayer = await currentPlayer === player1 ? player2 : player1;
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
-    console.log('här1')
     if (player1.type === 'human' || player2.type === 'human') {
-      console.log('här3')
-
       if ((currentPlayer.type === 'ai') || (currentPlayer.type === 'external')) {
-        console.log('här4')
-
         setTimeout(async () => {
           await handleMove();  // AI makes its move
           enableClicks();  // Re-enable clicks after AI has made its move
