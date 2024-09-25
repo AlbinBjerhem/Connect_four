@@ -170,6 +170,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("AI move, column:", col);
         gameState += (col + 1).toString();
     }
+    if (!gameActive) return;
 
     disableClicks();
 
