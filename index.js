@@ -103,26 +103,26 @@ document.addEventListener("DOMContentLoaded", function () {
     const player1NameInput = player1Input.value || 'Player 1';
     const player2NameInput = player2Input.value || 'Player 2';
 
-    player1 = valuetypes(player1Type, 1, board);
-    player2 = valuetypes(player2Type, 2, board);
-
-    // Set names based on player type
-    if (player1Type === 'human') {
-      player1.name = player1NameInput;
-    } else {
-      player1.name = player1Type === 'dumb' ? 'Dumb Bot' : 'Smart Bot';
-    }
-
-    if (player2Type === 'human') {
-      player2.name = player2NameInput;
-    } else if (player2Type === 'dumb') {
-      player2.name = 'Dumb Bot';
-    } else if (player2Type === 'smart') {
-      player2.name = 'Smart Bot';
-    } else {
-      player2.name = 'External AI';
-    }
-
+    player1 = valuetypes(player1Type, board, player1NameInput);
+    player2 = valuetypes(player2Type, board, player2NameInput);
+    /*
+        // Set names based on player type
+        if (player1Type === 'human') {
+          player1.name = player1NameInput;
+        } else {
+          player1.name = player1Type === 'dumb' ? 'Dumb Bot' : 'Smart Bot';
+        }
+    
+        if (player2Type === 'human') {
+          player2.name = player2NameInput;
+        } else if (player2Type === 'dumb') {
+          player2.name = 'Dumb Bot';
+        } else if (player2Type === 'smart') {
+          player2.name = 'Smart Bot';
+        } else {
+          player2.name = 'External AI';
+        }
+    */
     if (player1.name === player2.name) {
       player2.name = player2.name + ' 2';
     }

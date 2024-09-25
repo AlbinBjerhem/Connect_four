@@ -2,14 +2,11 @@ import { Person } from './classes/Person.js';
 import { Ai } from './classes/Ai.js';
 import { External } from './classes/external.js'
 
-const player1Input = document.getElementById("player1");
-const player2Input = document.getElementById("player2");
-
-export function valuetypes(type, i, board) {
+export function valuetypes(type, board, playerInput) {
   let player = ''
   switch (type) {
     case 'human':
-      player = human(i);
+      player = human(playerInput);
       break;
     case 'dumb':
       player = ai('dumb', board);
@@ -24,13 +21,8 @@ export function valuetypes(type, i, board) {
   return player;
 }
 
-function human(i) {
-  let player
-  if (i === 1) {
-    player = new Person(player1Input);
-  } else if (i === 2) {
-    player = new Person(player2Input);
-  }
+function human(playerInput) {
+  let player = new Person(playerInput);
   return player;
 }
 
