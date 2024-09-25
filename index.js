@@ -1,15 +1,11 @@
 import { Board } from './classes/Board.js';
-import { Person } from './classes/Person.js';
 import { Rules } from './classes/Rules.js';
-import { Ai } from './classes/Ai.js';
-import { External } from './classes/external.js'
+import { valuetypes, disableClicks, enableClicks } from './function.js'
 
 document.addEventListener("DOMContentLoaded", function () {
   const playGameButton = document.getElementById("play-game");
   const startGameButton = document.getElementById("startGameButton");
   const playerModal = document.getElementById("playerModal");
-  const player1Input = document.getElementById("player1");
-  const player2Input = document.getElementById("player2");
   const replayButton = document.getElementById("replay-game");
   const quitButton = document.getElementById("quit-game");
   const statusDisplay = document.getElementById("status");
@@ -62,19 +58,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
   renderBoard();
 
+  //replay button
   replayButton.addEventListener("click", resetGame);
 
+  //play game button
   playGameButton.addEventListener("click", function () {
     playerModal.style.display = "flex";
 
   });
 
+  //start game button
   startGameButton.addEventListener("click", async function () {
     const player1Type = document.getElementById("player1Type").value;
     const player2Type = document.getElementById("player2Type").value;
 
-    player1 = valuetypes(player1Type, 1)
-    player2 = valuetypes(player2Type, 2)
+    player1 = valuetypes(player1Type, 1, board)
+    player2 = valuetypes(player2Type, 2, board)
 
     if (player1.name === player2.name) {
       player2.name = player2.name + '2'
@@ -96,6 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  //quit button
   quitButton.addEventListener("click", function () {
     gameActive = false
     board = new Board();
@@ -116,6 +116,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelector('.scoreboard').style.display = 'none';
   });
 
+  //handle moves in board
   async function handleMove(event) {
     if (!gameActive) return;  // If the game is not active, do nothing
     let col;
@@ -321,60 +322,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function disableClicks() {
-    const gameBoard = document.querySelector('#board');
-    gameBoard.classList.add('no-click');
-  }
-
-  // Function to enable user interaction
-  function enableClicks() {
-    const gameBoard = document.querySelector('#board');
-    gameBoard.classList.remove('no-click');
-  }
-
   async function loopUntilGameEnds() {
     while (gameActive) {
       await handleMove();  // Wait for each move to complete before continuing
     }
-  }
-
-  function human(i) {
-    let player
-    if (i === 1) {
-      player = new Person(player1Input);
-    } else if (i === 2) {
-      player = new Person(player2Input);
-    }
-    return player;
-  }
-
-  function ai(level) {
-    let player = new Ai(level, board);
-    return player;
-  }
-
-  function external() {
-    let player = new External();
-    return player;
-  }
-
-  function valuetypes(type, i) {
-    let player = ''
-    switch (type) {
-      case 'human':
-        player = human(i);
-        break;
-      case 'dumb':
-        player = ai('dumb');
-        break;
-      case 'smart':
-        player = ai('smart');
-        break;
-      case 'external':
-        player = external();
-        break;
-    }
-    return player;
   }
 
 });
