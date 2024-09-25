@@ -151,8 +151,6 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    //    currentPlayer.color = currentPlayer.color = 'red' ? 'yellow' : 'red';
-
     // Place the piece on the board and get the Cell where it was placed
     const placedCell = board.placePiece(col, currentPlayer.color);  // Assuming placePiece now returns a Cell object
 
@@ -201,15 +199,17 @@ document.addEventListener("DOMContentLoaded", function () {
     // Switch turns
     currentPlayer = await currentPlayer === player1 ? player2 : player1;
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
+    console.log('här1')
+    if (player1.type === 'human' || player2.type === 'human') {
+      console.log('här3')
 
-    if ((player1.type !== 'human' && player2.type !== 'human')) {
-      if (player1.type === 'human' || player2.type === 'human') {
-        if ((currentPlayer.type === 'ai') || (currentPlayer.type === 'external')) {
-          setTimeout(async () => {
-            await handleMove();  // AI makes its move
-            enableClicks();  // Re-enable clicks after AI has made its move
-          }, 500);  // AI move delay
-        }
+      if ((currentPlayer.type === 'ai') || (currentPlayer.type === 'external')) {
+        console.log('här4')
+
+        setTimeout(async () => {
+          await handleMove();  // AI makes its move
+          enableClicks();  // Re-enable clicks after AI has made its move
+        }, 500);  // AI move delay
       }
     }
     // Handle AI move with a slight delay (for animation purposes)
