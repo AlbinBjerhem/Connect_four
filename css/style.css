@@ -136,13 +136,53 @@ button:hover {
   padding: 20px;
   border-radius: 10px;
   text-align: center;
+  width: 90%;
+  max-width: 400px;
 }
 
-.modal input {
+.modal-content h2 {
+  font-size: 1.8em;
+  margin-bottom: 20px;
+  font-family: 'Ubuntu', sans-serif;
+}
+
+.modal label {
+  display: block;
+  margin-top: 10px;
+  font-size: 1em;
+  font-weight: bold;
+  text-align: left;
+  font-family: 'Ubuntu', sans-serif;
+}
+
+.modal input,
+.modal select {
   display: block;
   margin: 10px auto;
-  padding: 10px;
-  font-size: 16px;
+  padding: 8px;
+  font-size: 1em;
+  font-family: 'Ubuntu', sans-serif;
+  border: 2px solid #333;
+  border-radius: 5px;
+  width: 100%;
+  max-width: 200px;
+}
+
+.modal select {
+  background-color: #fff;
+  color: rgb(30, 30, 30);
+}
+
+.modal-content button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 1em;
+  color: #fff;
+  background-color: #333;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Ubuntu', sans-serif;
 }
 
 .scoreboard {
@@ -165,7 +205,7 @@ button:hover {
   margin: 5px 0;
 }
 
-/* Mobileview */
+/* Mobile view */
 @media only screen and (max-width: 600px) {
   h1 {
     font-size: 1.8em;
@@ -187,6 +227,10 @@ button:hover {
     margin-top: 20px;
     cursor: pointer;
   }
+
+  .modal-content {
+    width: 95%;
+  }
 }
 
 input {
@@ -196,20 +240,6 @@ input {
 
 #status {
   font-size: 1em;
-}
-
-@keyframes blink {
-  0% {
-    opacity: 0.5;
-  }
-
-  50% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0.5;
-  }
 }
 
 .blink {

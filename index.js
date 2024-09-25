@@ -22,6 +22,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const nameErrorModalContent = document.createElement('div');
   const closeNameErrorModalButton = document.createElement('button');
 
+  // New references for player inputs and selects
+  const player1TypeSelect = document.getElementById("player1Type");
+  const player2TypeSelect = document.getElementById("player2Type");
+  const player1Input = document.getElementById("player1Input");
+  const player2Input = document.getElementById("player2Input");
+
   columnFullModal.classList.add('modal');
   columnFullModalContent.classList.add('modal-content');
   columnFullModalContent.innerHTML = `<p> Column is full, choose another column</p>`;
@@ -46,7 +52,6 @@ document.addEventListener("DOMContentLoaded", function () {
   nameErrorModal.appendChild(nameErrorModalContent);
   document.body.appendChild(nameErrorModal);
 
-
   let board = new Board();
   let player1;
   let player2;
@@ -58,25 +63,68 @@ document.addEventListener("DOMContentLoaded", function () {
 
   renderBoard();
 
-  //replay button
+  // Initialize input visibility based on default selections
+  updatePlayer1InputVisibility();
+  updatePlayer2InputVisibility();
+
+  // Event listeners for player type selection changes
+  player1TypeSelect.addEventListener('change', updatePlayer1InputVisibility);
+  player2TypeSelect.addEventListener('change', updatePlayer2InputVisibility);
+
+  function updatePlayer1InputVisibility() {
+    if (player1TypeSelect.value === 'human') {
+      player1Input.style.display = 'block';
+    } else {
+      player1Input.style.display = 'none';
+    }
+  }
+
+  function updatePlayer2InputVisibility() {
+    if (player2TypeSelect.value === 'human') {
+      player2Input.style.display = 'block';
+    } else {
+      player2Input.style.display = 'none';
+    }
+  }
+
+  // Replay button
   replayButton.addEventListener("click", resetGame);
 
-  //play game button
+  // Play game button
   playGameButton.addEventListener("click", function () {
     playerModal.style.display = "flex";
-
   });
 
-  //start game button
+  // Start game button
   startGameButton.addEventListener("click", async function () {
-    const player1Type = document.getElementById("player1Type").value;
-    const player2Type = document.getElementById("player2Type").value;
+    const player1Type = player1TypeSelect.value;
+    const player2Type = player2TypeSelect.value;
 
-    player1 = valuetypes(player1Type, 1, board)
-    player2 = valuetypes(player2Type, 2, board)
+    const player1NameInput = player1Input.value || 'Player 1';
+    const player2NameInput = player2Input.value || 'Player 2';
+
+    player1 = valuetypes(player1Type, 1, board);
+    player2 = valuetypes(player2Type, 2, board);
+
+    // Set names based on player type
+    if (player1Type === 'human') {
+      player1.name = player1NameInput;
+    } else {
+      player1.name = player1Type === 'dumb' ? 'Dumb Bot' : 'Smart Bot';
+    }
+
+    if (player2Type === 'human') {
+      player2.name = player2NameInput;
+    } else if (player2Type === 'dumb') {
+      player2.name = 'Dumb Bot';
+    } else if (player2Type === 'smart') {
+      player2.name = 'Smart Bot';
+    } else {
+      player2.name = 'External AI';
+    }
 
     if (player1.name === player2.name) {
-      player2.name = player2.name + '2'
+      player2.name = player2.name + ' 2';
     }
 
     player1NameDisplay.textContent = player1.name;
@@ -95,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  //quit button
+  // Quit button
   quitButton.addEventListener("click", function () {
     gameActive = false
     board = new Board();
@@ -116,7 +164,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelector('.scoreboard').style.display = 'none';
   });
 
-  //handle moves in board
+  // Handle moves in board
   async function handleMove(event) {
     if (!gameActive) return;  // If the game is not active, do nothing
     let col;

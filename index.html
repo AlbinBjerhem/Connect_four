@@ -29,19 +29,18 @@
 
   <div id="playerModal" class="modal">
     <div class="modal-content">
-      <h2>Enter Player Names</h2>
-      <label for="player1">Player 1:</label>
-      <input type="text" id="player1" placeholder="Enter Player 1 Name">
+      <h2>Choose Players</h2>
+
+      <!-- Player 1 Selection -->
       <label for="player1Type">Player 1 Type:</label>
       <select id="player1Type">
         <option value="human">Human</option>
         <option value="dumb">Dumb Bot</option>
         <option value="smart">Smart Bot</option>
-        <option value="external">External AI</option>
       </select>
+      <input type="text" id="player1Input" placeholder="Enter Player 1 Name">
 
-      <label for="player2">Player 2:</label>
-      <input type="text" id="player2" placeholder="Enter Player 2 Name">
+      <!-- Player 2 Selection -->
       <label for="player2Type">Player 2 Type:</label>
       <select id="player2Type">
         <option value="human">Human</option>
@@ -49,6 +48,8 @@
         <option value="smart">Smart Bot</option>
         <option value="external">External AI</option>
       </select>
+      <input type="text" id="player2Input" placeholder="Enter Player 2 Name">
+
       <button id="startGameButton">Start Game</button>
     </div>
   </div>
