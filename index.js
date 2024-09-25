@@ -105,24 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     player1 = valuetypes(player1Type, board, player1NameInput);
     player2 = valuetypes(player2Type, board, player2NameInput);
-    /*
-        // Set names based on player type
-        if (player1Type === 'human') {
-          player1.name = player1NameInput;
-        } else {
-          player1.name = player1Type === 'dumb' ? 'Dumb Bot' : 'Smart Bot';
-        }
-    
-        if (player2Type === 'human') {
-          player2.name = player2NameInput;
-        } else if (player2Type === 'dumb') {
-          player2.name = 'Dumb Bot';
-        } else if (player2Type === 'smart') {
-          player2.name = 'Smart Bot';
-        } else {
-          player2.name = 'External AI';
-        }
-    */
+
     if (player1.name === player2.name) {
       player2.name = player2.name + ' 2';
     }
@@ -300,6 +283,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function handleHover(event) {
     if (!gameActive) return;
 
+    if (currentPlayer.type !== 'human') return;
     const col = parseInt(event.target.dataset.col);
     const availableRow = findAvailableRow(col);
 
