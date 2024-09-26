@@ -88,7 +88,12 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Replay button
-  replayButton.addEventListener("click", resetGame);
+  replayButton.addEventListener("click", async function () {
+    resetGame()
+    if (player1.type === 'ai') {
+      await handleMove();
+    }
+  })
 
   // Play game button
   playGameButton.addEventListener("click", function () {
@@ -121,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     startGame();
 
-    if ((player1.type === 'external' || player1.type === 'ai')) {
+    if (player1.type === 'ai') {
       await handleMove();
     }
   });
@@ -154,20 +159,20 @@ document.addEventListener("DOMContentLoaded", function () {
     player1.color = 'red'
     player2.color = 'yellow'
 
-    switch (currentPlayer.type) {
+    switch (await currentPlayer.type) {
       case 'human':
         col = parseInt(event.target.dataset.col);  // No need to await parseInt
-        console.log("player move, column:", col);
+        console.log("player move, column: ", col + " color: ", currentPlayer.color);
         gameState += (col + 1).toString();
         break;
       case 'external':
         col = await currentPlayer.getMoveFromExternalAI(1, gameState);  // Assuming level 1 AI
-        console.log("external move, column:", col);
+        console.log("external move, column: ", col + " color: ", currentPlayer.color);
         gameState += (col + 1).toString();
         break;
       case 'ai':
         col = await currentPlayer.makeBotMove();  // Get the AI's move
-        console.log("AI move, column:", col);
+        console.log("AI move, column:", col + " color: ", currentPlayer.color);
         gameState += (col + 1).toString();
     }
     if (!gameActive) return;
@@ -180,13 +185,14 @@ document.addEventListener("DOMContentLoaded", function () {
       enableClicks();  // Re-enable clicks so the player can try another column
       return;
     }
-
+    if (!gameActive) return;
     // Place the piece on the board and get the Cell where it was placed
     const placedCell = board.placePiece(col, currentPlayer.color);  // Assuming placePiece now returns a Cell object
 
     // Extract row and col from the placedCell
     const { row, col: placedCol } = placedCell;
 
+    if (!gameActive) return;
     // Update the UI to reflect the placed piece
     const cellElement = document.querySelector(`.cell[data-row='${row}'][data-col='${placedCol}']`);
     cellElement.classList.remove("hover-player1", "hover-player2");
@@ -238,23 +244,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 500);  // AI move delay
       }
     }
-    if ((player1.type === 'external' || player1.type === 'ai') && (player2.type === 'external' || player2.type === 'ai')) {
+
+    if (player1.type === 'ai' && (player2.type === 'external' || player2.type === 'ai')) {
       await loopUntilGameEnds();
     }
     enableClicks();
-  }
-
-  function renderBoard() {
-    boardElement.innerHTML = '';
-    for (let r = 0; r < board.rows; r++) {
-      for (let c = 0; c < board.cols; c++) {
-        const cell = document.createElement("div");
-        cell.classList.add("cell");
-        cell.dataset.row = r;
-        cell.dataset.col = c;
-        boardElement.appendChild(cell);
-      }
-    }
   }
 
   function startGame() {
@@ -321,11 +315,31 @@ document.addEventListener("DOMContentLoaded", function () {
     return null;
   }
 
+
+  function renderBoard() {
+    boardElement.innerHTML = '';
+    for (let r = 0; r < board.rows; r++) {
+      for (let c = 0; c < board.cols; c++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.row = r;
+        cell.dataset.col = c;
+        boardElement.appendChild(cell);
+      }
+    }
+  }
+
   function resetGame() {
     board = new Board();
 
     gameActive = true;
     enableClicks()
+    if (player1.type === 'ai') {
+      player1 = ai(player1.level, board)
+    }
+    if (player2.type === 'ai') {
+      player2 = ai(player2.level, board)
+    }
     currentPlayer = player1;
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
     gameState = ''
@@ -341,17 +355,6 @@ document.addEventListener("DOMContentLoaded", function () {
         cell.addEventListener("mouseout", removeHover);
         cell.addEventListener("click", handleMove);
       }
-    }
-
-    if (player1.type === 'ai') {
-      player1 = ai(player1.level, board)
-    }
-    if (player2.type === 'ai') {
-      player2 = ai(player2.level, board)
-    }
-
-    if ((player1.type === 'external' || player1.type === 'ai')) {
-      handleMove();
     }
   }
 
