@@ -2,4 +2,4 @@
 - `pm install vite@latest`
 - `npm install --save-dev @cypress/webpack-preprocessor`
 - In the first terminal: `npm start`
-- In the second terminal: `npm run test-ui
+- In the second terminal: `npm run test-ui`
