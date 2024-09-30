@@ -1,6 +1,5 @@
 Feature: Player vs AI game
 
-
   Scenario: Player places a piece and waits for the dumb AI to place a piece
     Given that I am on the Connect Four game page
     When I click the "Play Game" button
@@ -10,7 +9,6 @@ Feature: Player vs AI game
     Then I wait for the dumb AI to place a piece
     And I should see that AI placed a piece
 
-
   Scenario: Player places a piece and waits for the smart AI to place a piece
     Given that I am on the Connect Four game page
     When I click the "Play Game" button
@@ -19,7 +17,6 @@ Feature: Player vs AI game
     And I place a piece in the first column
     Then I wait for the smart AI to place a piece
     And I should see that AI placed a piece
-
 
   Scenario: Dumb AI vs Smart AI
     Given that I am on the Connect Four game page
