@@ -30,3 +30,10 @@ Then('the game is played automatically until External AI wins', () => {
 And('I should see that External AI has won', () => {
   cy.get('span#player2Score', { timeout: 10000 }).should('contain', '1'); 
 });
+
+// Scenario: Smart AI vs External AI until External AI wins
+
+And('I enter Smart AI as Player 1 and choose Player 2 as External AI', () => {
+  cy.get('select#player1Type').select('smart'); 
+  cy.get('select#player2Type').select('external'); 
+});
