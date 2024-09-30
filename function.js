@@ -2,7 +2,7 @@ import { Person } from './classes/Person.js';
 import { Ai } from './classes/Ai.js';
 import { External } from './classes/external.js'
 
-export function valuetypes(type, board, playerInput) {
+export function valuetypes(type, board, playerInput, level = null) {
   let player = ''
   switch (type) {
     case 'human':
@@ -15,7 +15,7 @@ export function valuetypes(type, board, playerInput) {
       player = ai('smart', board);
       break;
     case 'external':
-      player = external();
+      player = external(level);
       break;
   }
   return player;
@@ -31,8 +31,9 @@ export function ai(level, board) {
   return player;
 }
 
-function external() {
-  let player = new External();
+export function external(level) {
+  let player = new External(level);
+  player.level = level;
   return player;
 }
 

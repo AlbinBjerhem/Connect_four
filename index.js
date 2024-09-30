@@ -1,6 +1,6 @@
 import { Board } from './classes/Board.js';
 import { Rules } from './classes/Rules.js';
-import { valuetypes, ai, disableClicks, enableClicks } from './function.js'
+import { valuetypes, ai, disableClicks, enableClicks, external } from './function.js'
 
 document.addEventListener("DOMContentLoaded", function () {
   const playGameButton = document.getElementById("play-game");
@@ -27,6 +27,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const player2TypeSelect = document.getElementById("player2Type");
   const player1Input = document.getElementById("player1Input");
   const player2Input = document.getElementById("player2Input");
+
+  //External AI level selection
+  const externalAILevelContainer = document.getElementById("externalAILevelContainer");
+  const externalAILevelSelect = document.getElementById("externalAILevel");
 
   columnFullModal.classList.add('modal');
   columnFullModalContent.classList.add('modal-content');
@@ -85,6 +89,11 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       player2Input.style.display = 'none';
     }
+    if (player2TypeSelect.value === 'external') {
+      externalAILevelContainer.style.display = 'block';
+    } else {
+      externalAILevelContainer.style.display = 'none';
+    }
   }
 
   // Replay button
@@ -109,7 +118,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const player2NameInput = player2Input.value || 'Player 2';
 
     player1 = valuetypes(player1Type, board, player1NameInput);
-    player2 = valuetypes(player2Type, board, player2NameInput);
+
+    if (player2Type === 'external') {
+      const player2Level = parseInt(externalAILevelSelect.value);
+      player2 = valuetypes(player2Type, board, player2NameInput, player2Level);
+    } else {
+      player2 = valuetypes(player2Type, board, player2NameInput);
+    }
 
     if (player1.name === player2.name) {
       player2.name = player2.name + ' 2';
@@ -166,7 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
         gameState += (col + 1).toString();
         break;
       case 'external':
-        col = await currentPlayer.getMoveFromExternalAI(1, gameState);  // Assuming level 1 AI
+        col = await currentPlayer.getMoveFromExternalAI(gameState);
         console.log("external move, column: ", col + " color: ", currentPlayer.color);
         gameState += (col + 1).toString();
         break;
@@ -186,6 +201,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
     if (!gameActive) return;
+
     // Place the piece on the board and get the Cell where it was placed
     const placedCell = board.placePiece(col, currentPlayer.color);  // Assuming placePiece now returns a Cell object
 
@@ -193,6 +209,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const { row, col: placedCol } = placedCell;
 
     if (!gameActive) return;
+
     // Update the UI to reflect the placed piece
     const cellElement = document.querySelector(`.cell[data-row='${row}'][data-col='${placedCol}']`);
     cellElement.classList.remove("hover-player1", "hover-player2");
@@ -339,6 +356,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     if (player2.type === 'ai') {
       player2 = ai(player2.level, board)
+    }
+    if (player2.type === 'external') {
+      player2 = external(player2.level)
     }
     currentPlayer = player1;
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
