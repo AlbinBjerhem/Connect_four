@@ -67,13 +67,18 @@ This file contains tests focused on player and AI interactions. Here are the mai
 
 This file includes tests involving an External AI opponent:
 
-1. **Dumb AI vs External AI**
-   - The dumb AI plays against an external AI until the external AI wins.
-   - Checks that the game ends with the external AI's victory as expected.
+1. **Smart AI vs External AI level 1**
+   - The smart AI plays against an external AI at level 1.
+   - Checks which AI won after the game is finished based on the `div#status`.
 
-2. **Smart AI vs External AI**
-   - The smart AI plays against an external AI until the external AI wins.
-   - Verifies that the game flow proceeds correctly until the external AI wins.
+2. **Smart AI vs External AI level 5**
+   - The smart AI plays against an external AI at level 1.
+   - Checks which AI won after the game is finished based on the `div#status`.
+
+3. **Smart AI vs External AI level 10**
+   - The smart AI plays against an external AI at level 1.
+   - Checks which AI won after the game is finished based on the scoreboard.
+   - Encountered a bug on whatever the last test was, the `div#status` would go over to who's turn it was.
 
 ### Testing Tools and Methodology
 
