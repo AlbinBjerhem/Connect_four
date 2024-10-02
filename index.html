@@ -23,6 +23,7 @@
 
     <button id="replay-game" style="display: none;">Play Again</button>
     <button id="play-game">Play Game</button>
+    <button id="play-online">Play Online</button>
     <button id="quit-game" style="display: none;">Quit Game</button>
 
   </div>
@@ -68,6 +69,41 @@
       </div>
 
       <button id="startGameButton">Start Game</button>
+    </div>
+  </div>
+
+  <!-- Online Play Modal -->
+  <div id="onlineModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h2>Play Online</h2>
+      <button id="createLobbyButton">Create Lobby</button>
+      <button id="joinLobbyButton">Join Lobby</button>
+
+      <!-- Create Lobby Name Input -->
+      <div id="createNameContainer" style="display: none; margin-top: 20px;">
+        <input type="text" id="createNameInput" placeholder="Enter Your Name">
+        <button id="createNameButton">Continue</button>
+      </div>
+
+      <!-- Lobby Code Display -->
+      <div id="lobbyCodeContainer" style="display: none; margin-top: 20px;">
+        <p>Your Lobby Code: <strong><span id="lobbyCodeDisplay"></span></strong></p>
+        <p>Share this code with a friend to join your game.</p>
+        <p>Waiting for another player to join...</p>
+      </div>
+
+      <!-- Join Lobby Name Input -->
+      <div id="joinNameContainer" style="display: none; margin-top: 20px;">
+        <input type="text" id="joinNameInput" placeholder="Enter Your Name">
+        <button id="joinNameButton">Continue</button>
+      </div>
+
+      <!-- Join Lobby Form -->
+      <div id="joinLobbyContainer" style="display: none; margin-top: 20px;">
+        <label for="joinCodeInput">Enter Lobby Code:</label>
+        <input type="text" id="joinCodeInput" placeholder="e.g., ABC123">
+        <button id="joinCodeButton">Join</button>
+      </div>
     </div>
   </div>
 

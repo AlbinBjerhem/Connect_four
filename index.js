@@ -1,6 +1,9 @@
 import { Board } from './classes/Board.js';
 import { Rules } from './classes/Rules.js';
-import { valuetypes, ai, disableClicks, enableClicks, external } from './function.js'
+import { valuetypes, ai, disableClicks, enableClicks, external } from './function.js';
+import { Person } from './classes/Person.js';
+import Network from './classes/Network.js';
+import generateCode from './classes/generateCode.js';
 
 document.addEventListener("DOMContentLoaded", function () {
   const playGameButton = document.getElementById("play-game");
@@ -28,13 +31,33 @@ document.addEventListener("DOMContentLoaded", function () {
   const player1Input = document.getElementById("player1Input");
   const player2Input = document.getElementById("player2Input");
 
-  //External AI level selection
+  // External AI level selection
   const externalAILevelContainer = document.getElementById("externalAILevelContainer");
   const externalAILevelSelect = document.getElementById("externalAILevel");
 
+  // References for online play
+  const playOnlineButton = document.getElementById("play-online");
+  const onlineModal = document.getElementById("onlineModal");
+  const createLobbyButton = document.getElementById("createLobbyButton");
+  const joinLobbyButton = document.getElementById("joinLobbyButton");
+  const lobbyCodeContainer = document.getElementById("lobbyCodeContainer");
+  const lobbyCodeDisplay = document.getElementById("lobbyCodeDisplay");
+  const joinLobbyContainer = document.getElementById("joinLobbyContainer");
+  const joinCodeInput = document.getElementById("joinCodeInput");
+  const joinCodeButton = document.getElementById("joinCodeButton");
+
+  // New references for online player name inputs
+  const createNameContainer = document.getElementById("createNameContainer");
+  const createNameInput = document.getElementById("createNameInput");
+  const createNameButton = document.getElementById("createNameButton");
+
+  const joinNameContainer = document.getElementById("joinNameContainer");
+  const joinNameInput = document.getElementById("joinNameInput");
+  const joinNameButton = document.getElementById("joinNameButton");
+
   columnFullModal.classList.add('modal');
   columnFullModalContent.classList.add('modal-content');
-  columnFullModalContent.innerHTML = `<p> Column is full, choose another column</p>`;
+  columnFullModalContent.innerHTML = `<p>Column is full, choose another column</p>`;
   closeModalButton.textContent = 'OK';
   closeModalButton.addEventListener('click', function () {
     columnFullModal.style.display = 'none';
@@ -64,6 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let player1Score = 0;
   let player2Score = 0;
   let gameState = '';
+  let isOnlineGame = false; // Flag to indicate online play
 
   renderBoard();
 
@@ -98,11 +122,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Replay button
   replayButton.addEventListener("click", async function () {
-    resetGame()
-    if (player1.type === 'ai') {
+    resetGame();
+    if (currentPlayer.type === 'ai') {
       await handleMove();
     }
-  })
+  });
 
   // Play game button
   playGameButton.addEventListener("click", function () {
@@ -117,15 +141,24 @@ document.addEventListener("DOMContentLoaded", function () {
     const player1NameInput = player1Input.value || 'Player 1';
     const player2NameInput = player2Input.value || 'Player 2';
 
-    player1 = valuetypes(player1Type, board, player1NameInput);
+    // Assign colors
+    const player1Color = 'red';
+    const player2Color = 'yellow';
 
+    // Create player1
+    player1 = valuetypes(player1Type, board, player1NameInput, null, player1Color);
+    player1.color = player1Color; // Ensure color is set
+
+    // Create player2
     if (player2Type === 'external') {
       const player2Level = parseInt(externalAILevelSelect.value);
-      player2 = valuetypes(player2Type, board, player2NameInput, player2Level);
+      player2 = valuetypes(player2Type, board, player2NameInput, player2Level, player2Color);
     } else {
-      player2 = valuetypes(player2Type, board, player2NameInput);
+      player2 = valuetypes(player2Type, board, player2NameInput, null, player2Color);
     }
+    player2.color = player2Color; // Ensure color is set
 
+    // Ensure unique names
     if (player1.name === player2.name) {
       player2.name = player2.name + ' 2';
     }
@@ -141,20 +174,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     startGame();
 
-    if (player1.type === 'ai') {
+    if (currentPlayer.type === 'ai') {
       await handleMove();
     }
   });
 
   // Quit button
   quitButton.addEventListener("click", function () {
-    gameActive = false
+    gameActive = false;
     board = new Board();
     renderBoard();
 
     player1Score = 0;
     player2Score = 0;
-    gameState = ''
+    gameState = '';
 
     player1ScoreDisplay.textContent = player1Score;
     player2ScoreDisplay.textContent = player2Score;
@@ -170,45 +203,43 @@ document.addEventListener("DOMContentLoaded", function () {
   // Handle moves in board
   async function handleMove(event) {
     if (!gameActive) return;  // If the game is not active, do nothing
-    let col;
-    player1.color = 'red'
-    player2.color = 'yellow'
 
-    switch (await currentPlayer.type) {
-      case 'human':
-        col = parseInt(event.target.dataset.col);  // No need to await parseInt
-        console.log("player move, column: ", col + " color: ", currentPlayer.color);
-        gameState += (col + 1).toString();
-        break;
-      case 'external':
-        col = await currentPlayer.getMoveFromExternalAI(gameState);
-        console.log("external move, column: ", col + " color: ", currentPlayer.color);
-        gameState += (col + 1).toString();
-        break;
-      case 'ai':
-        col = await currentPlayer.makeBotMove();  // Get the AI's move
-        console.log("AI move, column:", col + " color: ", currentPlayer.color);
-        gameState += (col + 1).toString();
+    if (isOnlineGame && currentPlayer.type !== 'human') {
+      console.warn("Not your turn!");
+      return;
     }
-    if (!gameActive) return;
 
-    disableClicks();
+    let col;
+    if (event) {
+      col = parseInt(event.target.dataset.col);
+    } else if (currentPlayer.type === 'ai') {
+      // For AI players
+      col = await currentPlayer.makeBotMove();
+    } else if (currentPlayer.type === 'external') {
+      // Handle external AI move
+      col = await currentPlayer.getMoveFromExternalAI(board);
+    } else {
+      // Should not happen, but handle the case where move method is not available
+      console.error("currentPlayer does not have a valid move method.");
+      return;
+    }
 
     // Check if the selected column is full
     if (board.isColumnFull(col)) {
-      columnFullModal.style.display = 'flex';
-      enableClicks();  // Re-enable clicks so the player can try another column
+      if (currentPlayer.type === 'human') {
+        columnFullModal.style.display = 'flex';
+      }
+      enableClicks();
       return;
     }
-    if (!gameActive) return;
+
+    disableClicks();
 
     // Place the piece on the board and get the Cell where it was placed
-    const placedCell = board.placePiece(col, currentPlayer.color);  // Assuming placePiece now returns a Cell object
+    const placedCell = board.placePiece(col, currentPlayer.color);
 
     // Extract row and col from the placedCell
     const { row, col: placedCol } = placedCell;
-
-    if (!gameActive) return;
 
     // Update the UI to reflect the placed piece
     const cellElement = document.querySelector(`.cell[data-row='${row}'][data-col='${placedCol}']`);
@@ -228,16 +259,24 @@ document.addEventListener("DOMContentLoaded", function () {
         winningCellElement.classList.add("blink");
       });
 
-      if (currentPlayer === player1) {
-        player1Score++;
-        player1ScoreDisplay.textContent = player1Score;
-      } else {
-        player2Score++;
-        player2ScoreDisplay.textContent = player2Score;
+      if (!isOnlineGame) {
+        if (currentPlayer === player1) {
+          player1Score++;
+          player1ScoreDisplay.textContent = player1Score;
+        } else {
+          player2Score++;
+          player2ScoreDisplay.textContent = player2Score;
+        }
       }
 
       gameActive = false;  // Disable game after a win
       replayButton.style.display = "block";
+
+      // Send the move and game over notification to the opponent
+      if (isOnlineGame && currentPlayer.type === 'human') {
+        Network.send(JSON.stringify({ type: 'move', col: col, gameOver: true, winner: currentPlayer.name }));
+      }
+
       return;
     }
 
@@ -246,48 +285,50 @@ document.addEventListener("DOMContentLoaded", function () {
       statusDisplay.textContent = "It's a draw!";
       gameActive = false;
       replayButton.style.display = "block";
+
+      // Notify opponent about the draw
+      if (isOnlineGame && currentPlayer.type === 'human') {
+        Network.send(JSON.stringify({ type: 'move', col: col, gameOver: true, draw: true }));
+      }
+
       return;
     }
 
+    // Send move to opponent in online game
+    if (isOnlineGame && currentPlayer.type === 'human') {
+      Network.send(JSON.stringify({ type: 'move', col: col }));
+    }
+
     // Switch turns
-    currentPlayer = await currentPlayer === player1 ? player2 : player1;
+    currentPlayer = currentPlayer === player1 ? player2 : player1;
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
 
-    if (player1.type === 'human' || player2.type === 'human') {
-      if ((currentPlayer.type === 'ai') || (currentPlayer.type === 'external')) {
-        setTimeout(async () => {
-          await handleMove();  // AI makes its move
-          enableClicks();  // Re-enable clicks after AI has made its move
-        }, 500);  // AI move delay
-      }
+    if (currentPlayer.type === 'human') {
+      enableClicks();
+    } else if (currentPlayer.type === 'ai' || currentPlayer.type === 'external') {
+      await handleMove();
+    } else {
+      disableClicks();
     }
-
-    if (player1.type === 'ai' && (player2.type === 'external' || player2.type === 'ai')) {
-      await loopUntilGameEnds();
-    }
-    enableClicks();
   }
 
   function startGame() {
     gameActive = true;
+    isOnlineGame = false; // Not an online game
     currentPlayer = player1;
-    enableClicks()
+    enableClicks();
     statusDisplay.style.display = "block";
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
 
-    boardElement.innerHTML = '';
+    board = new Board(); // Reset the board
+    renderBoard();
+
     for (let r = 0; r < board.rows; r++) {
       for (let c = 0; c < board.cols; c++) {
-        const cell = document.createElement("div");
-        cell.classList.add("cell");
-        cell.dataset.row = r;
-        cell.dataset.col = c;
-
+        const cell = document.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);
         cell.addEventListener("mouseover", handleHover);
         cell.addEventListener("mouseout", removeHover);
         cell.addEventListener("click", handleMove);
-
-        boardElement.appendChild(cell);
       }
     }
   }
@@ -332,7 +373,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return null;
   }
 
-
   function renderBoard() {
     boardElement.innerHTML = '';
     for (let r = 0; r < board.rows; r++) {
@@ -350,19 +390,19 @@ document.addEventListener("DOMContentLoaded", function () {
     board = new Board();
 
     gameActive = true;
-    enableClicks()
-    if (player1.type === 'ai') {
-      player1 = ai(player1.level, board)
+    enableClicks();
+
+    // Update AI players' board references
+    if (player1.type === 'ai' || player1.type === 'external') {
+      player1.board = board; // Update board reference
     }
-    if (player2.type === 'ai') {
-      player2 = ai(player2.level, board)
+    if (player2.type === 'ai' || player2.type === 'external') {
+      player2.board = board; // Update board reference
     }
-    if (player2.type === 'external') {
-      player2 = external(player2.level)
-    }
+
     currentPlayer = player1;
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
-    gameState = ''
+    gameState = '';
 
     replayButton.style.display = "none";
 
@@ -376,11 +416,263 @@ document.addEventListener("DOMContentLoaded", function () {
         cell.addEventListener("click", handleMove);
       }
     }
+
+    // Start the game if the AI is supposed to make the first move
+    if (currentPlayer.type === 'ai' || currentPlayer.type === 'external') {
+      handleMove();
+    }
   }
 
-  async function loopUntilGameEnds() {
-    while (gameActive) {
-      await handleMove();  // Wait for each move to complete before continuing
+  // Online Play Functions
+
+  playOnlineButton.addEventListener("click", function () {
+    onlineModal.style.display = "flex";
+
+    // Hide all other containers
+    createLobbyButton.style.display = "block";
+    joinLobbyButton.style.display = "block";
+    createNameContainer.style.display = "none";
+    joinNameContainer.style.display = "none";
+    lobbyCodeContainer.style.display = "none";
+    joinLobbyContainer.style.display = "none";
+  });
+
+  createLobbyButton.addEventListener("click", function () {
+    // Show name input for creating lobby
+    createLobbyButton.style.display = "none";
+    joinLobbyButton.style.display = "none";
+    createNameContainer.style.display = "block";
+  });
+
+  createNameButton.addEventListener("click", function () {
+    const playerName = createNameInput.value.trim() || 'Player 1';
+
+    // Generate lobby code
+    const code = generateCode();
+    lobbyCodeDisplay.textContent = code;
+    lobbyCodeContainer.style.display = "block";
+    createNameContainer.style.display = "none";
+
+    // Set up network connection
+    const userId = Math.random().toString(36).substr(2, 9);
+    Network.startConnection(userId, code, networkListener);
+
+    // Store userId and code for later use
+    sessionStorage.setItem('userId', userId);
+    sessionStorage.setItem('code', code);
+    sessionStorage.setItem('playerName', playerName);
+
+    // Set player1 name
+    player1NameDisplay.textContent = playerName;
+  });
+
+  joinLobbyButton.addEventListener("click", function () {
+    // Show name input for joining lobby
+    createLobbyButton.style.display = "none";
+    joinLobbyButton.style.display = "none";
+    joinNameContainer.style.display = "block";
+  });
+
+  joinNameButton.addEventListener("click", function () {
+    const playerName = joinNameInput.value.trim() || 'Player 2';
+
+    // Show join code input
+    joinNameContainer.style.display = "none";
+    joinLobbyContainer.style.display = "block";
+
+    // Store player name
+    sessionStorage.setItem('playerName', playerName);
+  });
+
+  joinCodeButton.addEventListener("click", function () {
+    const code = joinCodeInput.value.trim().toUpperCase();
+    const playerName = sessionStorage.getItem('playerName') || 'Player 2';
+
+    if (code) {
+      const userId = Math.random().toString(36).substr(2, 9);
+      Network.startConnection(userId, code, networkListener);
+
+      // Store userId for later use
+      sessionStorage.setItem('userId', userId);
+
+      // Delay sending the 'join' message to ensure connection is established
+      setTimeout(() => {
+        // Notify the other player that the game can start
+        Network.send(JSON.stringify({ type: 'join', userId: userId, playerName: playerName }));
+      }, 1000); // Adjust the delay as needed
+
+      // We do not call startOnlineGame() here; we'll wait for the 'start' message from the lobby creator
+
+    } else {
+      alert("Please enter a valid code.");
+    }
+  });
+
+  function networkListener(message) {
+    console.log("Received message:", message); // For debugging
+
+    // Ignore messages sent by ourselves
+    if (message.user === sessionStorage.getItem('userId')) {
+      return;
+    }
+
+    // Check if the message is from the system and ignore it
+    if (message.user && message.user === 'system') {
+      console.log("System message received:", message.data);
+      return;
+    }
+
+    // Parse the actual message sent by the other player
+    let parsedData;
+    try {
+      parsedData = JSON.parse(message.data);
+    } catch (error) {
+      console.error("Failed to parse message data:", message.data);
+      return;
+    }
+
+    // Handle the parsed message
+    if (parsedData.type === 'join') {
+      // The other player has joined
+      sessionStorage.setItem('opponentName', parsedData.playerName || 'Opponent');
+
+      // Send a 'start' message to the joining player to initiate the game
+      Network.send(JSON.stringify({ type: 'start', playerName: sessionStorage.getItem('playerName') }));
+
+      // Start the game on the lobby creator's side
+      onlineModal.style.display = "none";
+      startOnlineGame();
+
+    } else if (parsedData.type === 'start') {
+      // The lobby creator has sent a 'start' message
+      sessionStorage.setItem('opponentName', parsedData.playerName || 'Opponent');
+      onlineModal.style.display = "none";
+      startOnlineGame();
+
+    } else if (parsedData.type === 'move') {
+      // Handle move from the other player
+      const col = parsedData.col;
+      handleRemoteMove(col);
+    }
+  }
+
+  function startOnlineGame() {
+    gameActive = true;
+    isOnlineGame = true; // Indicate online play
+
+    // Determine player roles based on session data
+    const code = sessionStorage.getItem('code');
+    const userId = sessionStorage.getItem('userId');
+    const playerName = sessionStorage.getItem('playerName') || 'You';
+    const opponentName = sessionStorage.getItem('opponentName') || 'Opponent';
+
+    board = new Board();
+    renderBoard();
+
+    if (code) {
+      // Creator of the lobby (Player 1)
+      player1 = new Person(playerName);
+      player1.type = 'human';
+      player1.color = 'red';
+
+      player2 = new Person(opponentName);
+      player2.type = 'remote';
+      player2.color = 'yellow';
+
+      currentPlayer = player1; // Lobby creator starts first
+
+    } else {
+      // Joined the lobby (Player 2)
+      player1 = new Person(opponentName);
+      player1.type = 'remote';
+      player1.color = 'red';
+
+      player2 = new Person(playerName);
+      player2.type = 'human';
+      player2.color = 'yellow';
+
+      currentPlayer = player1; // It's the opponent's turn first
+    }
+
+    player1NameDisplay.textContent = player1.name;
+    player2NameDisplay.textContent = player2.name;
+
+    statusDisplay.style.display = "block";
+    statusDisplay.textContent = `${currentPlayer.name}'s turn`;
+
+    document.querySelector('.scoreboard').style.display = 'flex';
+
+    // Add event listeners for local player's moves
+    for (let r = 0; r < board.rows; r++) {
+      for (let c = 0; c < board.cols; c++) {
+        const cell = document.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);
+        cell.addEventListener("mouseover", handleHover);
+        cell.addEventListener("mouseout", removeHover);
+        cell.addEventListener("click", handleMove);
+      }
+    }
+
+    if (currentPlayer.type === 'human') {
+      enableClicks();
+    } else {
+      disableClicks();
+    }
+  }
+
+  function handleRemoteMove(col) {
+    if (!gameActive) return;
+
+    if (board.isColumnFull(col)) {
+      console.error('Received move for full column');
+      return;
+    }
+
+    // Identify the remote player
+    let remotePlayer = player1.type === 'remote' ? player1 : player2;
+
+    // Place the piece using the remote player's color
+    const placedCell = board.placePiece(col, remotePlayer.color);
+
+    // Extract row and col from the placedCell
+    const { row, col: placedCol } = placedCell;
+
+    // Update the UI to reflect the placed piece
+    const cellElement = document.querySelector(`.cell[data-row='${row}'][data-col='${placedCol}']`);
+    cellElement.classList.remove("hover-player1", "hover-player2");
+    cellElement.classList.add(remotePlayer === player1 ? "player1" : "player2");
+
+    // Check if the current move results in a win
+    const winningDiscs = Rules.checkWin(board, remotePlayer.color, row, placedCol);
+
+    if (winningDiscs) {
+      // If the remote player wins, update the display
+      statusDisplay.textContent = `${remotePlayer.name} wins!`;
+
+      // Highlight the winning cells
+      winningDiscs.forEach(disc => {
+        const winningCellElement = document.querySelector(`.cell[data-row='${disc.row}'][data-col='${disc.col}']`);
+        winningCellElement.classList.add("blink");
+      });
+
+      gameActive = false;  // Disable game after a win
+      return;
+    }
+
+    // Check for a draw
+    if (Rules.checkDraw(board)) {
+      statusDisplay.textContent = "It's a draw!";
+      gameActive = false;
+      return;
+    }
+
+    // Switch turns
+    currentPlayer = currentPlayer === player1 ? player2 : player1;
+    statusDisplay.textContent = `${currentPlayer.name}'s turn`;
+
+    if (currentPlayer.type === 'human') {
+      enableClicks();
+    } else {
+      disableClicks();
     }
   }
 
