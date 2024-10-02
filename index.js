@@ -122,9 +122,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Replay button
   replayButton.addEventListener("click", async function () {
-    resetGame();
-    if (currentPlayer.type === 'ai') {
-      await handleMove();
+    if (isOnlineGame) {
+      Network.send(JSON.stringify({ type: 'reset' })); // Reset game for opponent
+      resetOnlineGame();
+    } else {
+      resetGame();
+      if (currentPlayer.type === 'ai') {
+        await handleMove();
+      }
     }
   });
 
@@ -171,6 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
     playerModal.style.display = "none";
     playGameButton.style.display = "none";
     quitButton.style.display = "block";
+    playOnlineButton.style.display = "none";
 
     startGame();
 
@@ -193,6 +199,7 @@ document.addEventListener("DOMContentLoaded", function () {
     player2ScoreDisplay.textContent = player2Score;
 
     playGameButton.style.display = "block";
+    playOnlineButton.style.display = "block";
     replayButton.style.display = "none";
     quitButton.style.display = "none";
     statusDisplay.style.display = "none";
@@ -213,9 +220,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (event) {
       col = parseInt(event.target.dataset.col);
     } else if (currentPlayer.type === 'ai') {
+      if (!gameActive) return; 
       // For AI players
       col = await currentPlayer.makeBotMove();
     } else if (currentPlayer.type === 'external') {
+      if (!gameActive) return; 
       // Handle external AI move
       col = await currentPlayer.getMoveFromExternalAI(board);
     } else {
@@ -224,6 +233,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+    if (!gameActive) return;
     // Check if the selected column is full
     if (board.isColumnFull(col)) {
       if (currentPlayer.type === 'human') {
@@ -423,6 +433,37 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  function resetOnlineGame() {
+    board = new Board();
+    gameActive = true;
+    renderBoard();
+
+    player1Score = 0;
+    player2Score = 0;
+    gameState = '';
+
+    player1ScoreDisplay.textContent = player1Score;
+    player2ScoreDisplay.textContent = player2Score;
+
+    replayButton.style.display = "none";
+    statusDisplay.textContent = `${currentPlayer.name}'s turn`;
+
+    // Add event listeners for new game moves
+    for (let r = 0; r < board.rows; r++) {
+      for (let c = 0; c < board.cols; c++) {
+        const cell = document.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);
+        cell.addEventListener("mouseover", handleHover);
+        cell.addEventListener("mouseout", removeHover);
+        cell.addEventListener("click", handleMove);
+      }
+    }
+
+    if (currentPlayer.type === 'human') {
+      enableClicks();
+    } else {
+      disableClicks();
+    }
+  }
   // Online Play Functions
 
   playOnlineButton.addEventListener("click", function () {
@@ -553,6 +594,9 @@ document.addEventListener("DOMContentLoaded", function () {
       // Handle move from the other player
       const col = parsedData.col;
       handleRemoteMove(col);
+    } else if (parsedData.type === 'reset') {
+      // Handle reset from the other player
+      resetOnlineGame(); // Reset the game state for the opponent
     }
   }
 
@@ -602,6 +646,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelector('.scoreboard').style.display = 'flex';
 
+    playOnlineButton.style.display = "none";
+    playGameButton.style.display = "none";
     // Add event listeners for local player's moves
     for (let r = 0; r < board.rows; r++) {
       for (let c = 0; c < board.cols; c++) {
