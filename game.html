@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Connect Four</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/animation.css">
+</head>
+
+<body>
+
+  <h1 id="animation">Connect Four</h1>
+
+  <div class="game-container">
+    <div class="player-info">
+      <div id="status"></div>
+    </div>
+
+    <div class="board" id="board">
+    </div>
+
+    <button id="replay-game" style="display: none;">Play Again</button>
+    <button id="play-game">Play Game</button>
+    <button id="play-online">Play Online</button>
+    <button id="quit-game" style="display: none;">Quit Game</button>
+
+  </div>
+
+  <div id="playerModal" class="modal">
+    <div class="modal-content">
+      <h2>Choose Players</h2>
+
+      <label for="player1Type">Player 1 Type:</label>
+      <select id="player1Type">
+        <option value="human">Human</option>
+        <option value="dumb">Dumb Bot</option>
+        <option value="smart">Smart Bot</option>
+      </select>
+      <input type="text" id="player1Input" placeholder="Enter Player 1 Name">
+
+      <label for="player2Type">Player 2 Type:</label>
+      <select id="player2Type">
+        <option value="human">Human</option>
+        <option value="dumb">Dumb Bot</option>
+        <option value="smart">Smart Bot</option>
+        <option value="external">External AI</option>
+      </select>
+      <input type="text" id="player2Input" placeholder="Enter Player 2 Name">
+
+      <div id="externalAILevelContainer" style="display: none;">
+        <label for="externalAILevel">External AI Level:</label>
+        <select id="externalAILevel">
+          <option value="1">Level 1</option>
+          <option value="2">Level 2</option>
+          <option value="3">Level 3</option>
+          <option value="4">Level 4</option>
+          <option value="5">Level 5</option>
+          <option value="6">Level 6</option>
+          <option value="7">Level 7</option>
+          <option value="8">Level 8</option>
+          <option value="9">Level 9</option>
+          <option value="10">Level 10</option>
+        </select>
+      </div>
+
+      <button id="startGameButton">Start Game</button>
+    </div>
+  </div>
+
+  <div id="onlineModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h2>Play Online</h2>
+      <button id="createLobbyButton">Create Lobby</button>
+      <button id="joinLobbyButton">Join Lobby</button>
+
+      <div id="createNameContainer" style="display: none; margin-top: 20px;">
+        <input type="text" id="createNameInput" placeholder="Enter Your Name">
+        <button id="createNameButton">Continue</button>
+      </div>
+
+      <div id="lobbyCodeContainer" style="display: none; margin-top: 20px;">
+        <p>Your Lobby Code: <strong><span id="lobbyCodeDisplay"></span></strong></p>
+        <p>Share this code with a friend to join your game.</p>
+        <p>Waiting for another player to join...</p>
+      </div>
+
+      <div id="joinNameContainer" style="display: none; margin-top: 20px;">
+        <input type="text" id="joinNameInput" placeholder="Enter Your Name">
+        <button id="joinNameButton">Continue</button>
+      </div>
+
+      <div id="joinLobbyContainer" style="display: none; margin-top: 20px;">
+        <label for="joinCodeInput">Enter Lobby Code:</label>
+        <input type="text" id="joinCodeInput" placeholder="e.g., ABC123">
+        <button id="joinCodeButton">Join</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="scoreboard">
+    <h2>Scoreboard</h2>
+    <div class="player-score">
+      <h3><span id="player1Name">Player 1</span>: <span id="player1Score">0</span></h3>
+    </div>
+
+    <div class="player-score">
+      <h3><span id="player2Name">Player 2</span>: <span id="player2Score">0</span></h3>
+    </div>
+  </div>
+
+  <script type="module" src="index.js"></script>
+  <script type="module" src="function.js"></script>
+
+</body>
+
+</html>

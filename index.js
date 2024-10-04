@@ -25,17 +25,14 @@ document.addEventListener("DOMContentLoaded", function () {
   const nameErrorModalContent = document.createElement('div');
   const closeNameErrorModalButton = document.createElement('button');
 
-  // New references for player inputs and selects
   const player1TypeSelect = document.getElementById("player1Type");
   const player2TypeSelect = document.getElementById("player2Type");
   const player1Input = document.getElementById("player1Input");
   const player2Input = document.getElementById("player2Input");
 
-  // External AI level selection
   const externalAILevelContainer = document.getElementById("externalAILevelContainer");
   const externalAILevelSelect = document.getElementById("externalAILevel");
 
-  // References for online play
   const playOnlineButton = document.getElementById("play-online");
   const onlineModal = document.getElementById("onlineModal");
   const createLobbyButton = document.getElementById("createLobbyButton");
@@ -46,7 +43,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const joinCodeInput = document.getElementById("joinCodeInput");
   const joinCodeButton = document.getElementById("joinCodeButton");
 
-  // New references for online player name inputs
   const createNameContainer = document.getElementById("createNameContainer");
   const createNameInput = document.getElementById("createNameInput");
   const createNameButton = document.getElementById("createNameButton");
@@ -87,15 +83,19 @@ document.addEventListener("DOMContentLoaded", function () {
   let player1Score = 0;
   let player2Score = 0;
   let gameState = '';
-  let isOnlineGame = false; // Flag to indicate online play
+  let isOnlineGame = false; 
+  let userId;
+  let code;
+  let playerName;
+  let opponentName;
+  let swapRoles = false; // Swap roles when Play Again // 
+  let isCreator; 
 
   renderBoard();
 
-  // Initialize input visibility based on default selections
   updatePlayer1InputVisibility();
   updatePlayer2InputVisibility();
 
-  // Event listeners for player type selection changes
   player1TypeSelect.addEventListener('change', updatePlayer1InputVisibility);
   player2TypeSelect.addEventListener('change', updatePlayer2InputVisibility);
 
@@ -120,16 +120,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Replay button
   replayButton.addEventListener("click", async function () {
     if (isOnlineGame) {
-      // Toggle a 'swapRoles' flag
-      let swapRoles = sessionStorage.getItem('swapRoles') === 'true' ? false : true;
-      sessionStorage.setItem('swapRoles', swapRoles);
+      swapRoles = !swapRoles;
 
-      Network.send(JSON.stringify({ type: 'reset', swap: swapRoles })); // Reset game for opponent and indicate swapping roles
+      Network.send(JSON.stringify({ type: 'reset', swap: swapRoles })); 
 
-      resetOnlineGame(swapRoles); // Reset the game
+      resetOnlineGame(swapRoles); 
     } else {
       resetGame();
       if (currentPlayer.type === 'ai') {
@@ -151,13 +148,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const player1NameInput = player1Input.value || 'Player 1';
     const player2NameInput = player2Input.value || 'Player 2';
 
-    // Assign colors
     const player1Color = 'red';
     const player2Color = 'yellow';
 
     // Create player1
     player1 = valuetypes(player1Type, board, player1NameInput, null, player1Color);
-    player1.color = player1Color; // Ensure color is set
+    player1.color = player1Color; 
 
     // Create player2
     if (player2Type === 'external') {
@@ -166,9 +162,8 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       player2 = valuetypes(player2Type, board, player2NameInput, null, player2Color);
     }
-    player2.color = player2Color; // Ensure color is set
+    player2.color = player2Color; 
 
-    // Ensure unique names
     if (player1.name === player2.name) {
       player2.name = player2.name + ' 2';
     }
@@ -193,13 +188,11 @@ document.addEventListener("DOMContentLoaded", function () {
   // Quit button
   quitButton.addEventListener("click", async function () {
     if (isOnlineGame) {
-      // Send 'quit' message to opponent
-      const playerName = sessionStorage.getItem('playerName') || 'Player';
-      await Network.send(JSON.stringify({ type: 'quit', playerName: playerName }));
-      // Close the network connection
+      // Message opponent
+      const playerNameQuit = playerName || 'Player';
+      await Network.send(JSON.stringify({ type: 'quit', playerName: playerNameQuit }));
       Network.closeConnection();
 
-      // Reset variables
       gameActive = false;
       isOnlineGame = false;
 
@@ -212,11 +205,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
       document.querySelector('.scoreboard').style.display = 'none';
 
-      // Clear board
       board = new Board();
       renderBoard();
     } else {
-      // Original code
       gameActive = false;
       board = new Board();
       renderBoard();
@@ -240,7 +231,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Handle moves in board
   async function handleMove(event) {
-    if (!gameActive) return;  // If the game is not active, do nothing
+    if (!gameActive) return;  
 
     if (isOnlineGame && currentPlayer.type !== 'human') {
       console.warn("Not your turn!");
@@ -276,22 +267,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     disableClicks();
 
-    // Place the piece on the board and get the Cell where it was placed
     const placedCell = board.placePiece(col, currentPlayer.color);
 
-    // Extract row and col from the placedCell
     const { row, col: placedCol } = placedCell;
 
-    // Update the UI to reflect the placed piece
     const cellElement = document.querySelector(`.cell[data-row='${row}'][data-col='${placedCol}']`);
     cellElement.classList.remove("hover-player1", "hover-player2");
     cellElement.classList.add(currentPlayer === player1 ? "player1" : "player2");
 
-    // Check if the current move results in a win
     const winningDiscs = Rules.checkWin(board, currentPlayer.color, row, placedCol);
 
     if (winningDiscs) {
-      // If the current player wins, update the display and score
       statusDisplay.textContent = `${currentPlayer.name} wins!`;
 
       // Highlight the winning cells
@@ -327,7 +313,6 @@ document.addEventListener("DOMContentLoaded", function () {
       gameActive = false;
       replayButton.style.display = "block";
 
-      // Notify opponent about the draw
       if (isOnlineGame && currentPlayer.type === 'human') {
         Network.send(JSON.stringify({ type: 'move', col: col, gameOver: true, draw: true }));
       }
@@ -355,13 +340,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function startGame() {
     gameActive = true;
-    isOnlineGame = false; // Not an online game
+    isOnlineGame = false; 
     currentPlayer = player1;
     enableClicks();
     statusDisplay.style.display = "block";
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
 
-    board = new Board(); // Reset the board
+    board = new Board(); 
     renderBoard();
 
     for (let r = 0; r < board.rows; r++) {
@@ -435,10 +420,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Update AI players' board references
     if (player1.type === 'ai' || player1.type === 'external') {
-      player1.board = board; // Update board reference
+      player1.board = board; 
     }
     if (player2.type === 'ai' || player2.type === 'external') {
-      player2.board = board; // Update board reference
+      player2.board = board; 
     }
 
     currentPlayer = player1;
@@ -466,20 +451,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function resetOnlineGame(swapRoles) {
     gameActive = true;
-    isOnlineGame = true; // Indicate online play
-
-    // Determine player roles based on session data and swapRoles flag
-    const code = sessionStorage.getItem('code');
-    const userId = sessionStorage.getItem('userId');
-    const playerName = sessionStorage.getItem('playerName') || 'You';
-    const opponentName = sessionStorage.getItem('opponentName') || 'Opponent';
+    isOnlineGame = true; 
 
     board = new Board();
     renderBoard();
 
-    if (code) {
-      // Creator of the lobby
-      if (swapRoles === 'true' || swapRoles === true) {
+    if (isCreator) {
+      if (swapRoles) {
         // Swap roles
         player1 = new Person(opponentName);
         player1.type = 'remote';
@@ -489,10 +467,9 @@ document.addEventListener("DOMContentLoaded", function () {
         player2.type = 'human';
         player2.color = 'yellow';
 
-        currentPlayer = player1; // Opponent starts
+        currentPlayer = player1; 
 
       } else {
-        // Original roles
         player1 = new Person(playerName);
         player1.type = 'human';
         player1.color = 'red';
@@ -500,14 +477,12 @@ document.addEventListener("DOMContentLoaded", function () {
         player2 = new Person(opponentName);
         player2.type = 'remote';
         player2.color = 'yellow';
-
-        currentPlayer = player1; // Lobby creator starts
+        currentPlayer = player1; 
       }
 
     } else {
-      // Joined the lobby
-      if (swapRoles === 'true' || swapRoles === true) {
-        // Swap roles
+      if (swapRoles) {
+
         player1 = new Person(playerName);
         player1.type = 'human';
         player1.color = 'red';
@@ -516,10 +491,8 @@ document.addEventListener("DOMContentLoaded", function () {
         player2.type = 'remote';
         player2.color = 'yellow';
 
-        currentPlayer = player1; // You start
-
+        currentPlayer = player1; 
       } else {
-        // Original roles
         player1 = new Person(opponentName);
         player1.type = 'remote';
         player1.color = 'red';
@@ -528,7 +501,7 @@ document.addEventListener("DOMContentLoaded", function () {
         player2.type = 'human';
         player2.color = 'yellow';
 
-        currentPlayer = player1; // Opponent starts
+        currentPlayer = player1; 
       }
     }
 
@@ -581,63 +554,49 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   createNameButton.addEventListener("click", function () {
-    const playerName = createNameInput.value.trim() || 'Player 1';
+    playerName = createNameInput.value.trim() || 'Player 1';
 
     // Generate lobby code
-    const code = generateCode();
+    code = generateCode();
     lobbyCodeDisplay.textContent = code;
     lobbyCodeContainer.style.display = "block";
     createNameContainer.style.display = "none";
 
     // Set up network connection
-    const userId = Math.random().toString(36).substr(2, 9);
+    userId = Math.random().toString(36).substr(2, 9);
     Network.startConnection(userId, code, networkListener);
 
-    // Store userId and code for later use
-    sessionStorage.setItem('userId', userId);
-    sessionStorage.setItem('code', code);
-    sessionStorage.setItem('playerName', playerName);
+    isCreator = true; 
 
     // Set player1 name
     player1NameDisplay.textContent = playerName;
   });
 
   joinLobbyButton.addEventListener("click", function () {
-    // Show name input for joining lobby
     createLobbyButton.style.display = "none";
     joinLobbyButton.style.display = "none";
     joinNameContainer.style.display = "block";
   });
 
   joinNameButton.addEventListener("click", function () {
-    const playerName = joinNameInput.value.trim() || 'Player 2';
+    playerName = joinNameInput.value.trim() || 'Player 2';
 
-    // Show join code input
     joinNameContainer.style.display = "none";
     joinLobbyContainer.style.display = "block";
-
-    // Store player name
-    sessionStorage.setItem('playerName', playerName);
   });
 
   joinCodeButton.addEventListener("click", function () {
-    const code = joinCodeInput.value.trim().toUpperCase();
-    const playerName = sessionStorage.getItem('playerName') || 'Player 2';
+    code = joinCodeInput.value.trim().toUpperCase();
 
     if (code) {
-      const userId = Math.random().toString(36).substr(2, 9);
+      userId = Math.random().toString(36).substr(2, 9);
       Network.startConnection(userId, code, networkListener);
 
-      // Store userId for later use
-      sessionStorage.setItem('userId', userId);
+      isCreator = false; 
 
-      // Delay sending the 'join' message to ensure connection is established
       setTimeout(() => {
-        // Notify the other player that the game can start
         Network.send(JSON.stringify({ type: 'join', userId: userId, playerName: playerName }));
-      }, 1000); // Adjust the delay as needed
-
-      // We do not call startOnlineGame() here; we'll wait for the 'start' message from the lobby creator
+      }, 1000); 
 
     } else {
       alert("Please enter a valid code.");
@@ -645,20 +604,16 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   function networkListener(message) {
-    console.log("Received message:", message); // For debugging
+    console.log("Received message:", message);
 
-    // Ignore messages sent by ourselves
-    if (message.user === sessionStorage.getItem('userId')) {
+    if (message.user === userId) {
       return;
     }
-
-    // Check if the message is from the system and ignore it
     if (message.user && message.user === 'system') {
       console.log("System message received:", message.data);
       return;
     }
 
-    // Parse the actual message sent by the other player
     let parsedData;
     try {
       parsedData = JSON.parse(message.data);
@@ -667,45 +622,33 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    // Handle the parsed message
     if (parsedData.type === 'join') {
-      // The other player has joined
-      sessionStorage.setItem('opponentName', parsedData.playerName || 'Opponent');
+      opponentName = parsedData.playerName || 'Opponent';
 
-      // Send a 'start' message to the joining player to initiate the game
-      Network.send(JSON.stringify({ type: 'start', playerName: sessionStorage.getItem('playerName') }));
+      Network.send(JSON.stringify({ type: 'start', playerName: playerName }));
 
-      // Start the game on the lobby creator's side
       onlineModal.style.display = "none";
       startOnlineGame();
 
     } else if (parsedData.type === 'start') {
-      // The lobby creator has sent a 'start' message
-      sessionStorage.setItem('opponentName', parsedData.playerName || 'Opponent');
+      opponentName = parsedData.playerName || 'Opponent';
       onlineModal.style.display = "none";
       startOnlineGame();
 
     } else if (parsedData.type === 'move') {
-      // Handle move from the other player
       const col = parsedData.col;
       handleRemoteMove(col);
     } else if (parsedData.type === 'reset') {
-      // Handle reset from the other player
-      let swapRoles = parsedData.swap;
+      swapRoles = parsedData.swap;
 
-      // Update swapRoles in sessionStorage
-      sessionStorage.setItem('swapRoles', swapRoles);
-
-      resetOnlineGame(swapRoles); // Reset the game state for the opponent
+      resetOnlineGame(swapRoles); 
     } else if (parsedData.type === 'quit') {
       // Opponent has quit the game
-      let playerName = parsedData.playerName || 'Opponent';
-      alert(`${playerName} left the game.`);
-      // Perform cleanup
+      let playerNameQuit = parsedData.playerName || 'Opponent';
+      alert(`${playerNameQuit} left the game.`);
       gameActive = false;
       isOnlineGame = false;
 
-      // Close the network connection
       Network.closeConnection();
 
       // Reset UI
@@ -717,7 +660,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
       document.querySelector('.scoreboard').style.display = 'none';
 
-      // Clear board
       board = new Board();
       renderBoard();
     }
@@ -725,22 +667,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function startOnlineGame() {
     gameActive = true;
-    isOnlineGame = true; // Indicate online play
+    isOnlineGame = true;
 
-    // Initialize swapRoles
-    sessionStorage.setItem('swapRoles', false);
-
-    // Determine player roles based on session data
-    const code = sessionStorage.getItem('code');
-    const userId = sessionStorage.getItem('userId');
-    const playerName = sessionStorage.getItem('playerName') || 'You';
-    const opponentName = sessionStorage.getItem('opponentName') || 'Opponent';
+    swapRoles = false;
 
     board = new Board();
     renderBoard();
 
-    if (code) {
-      // Creator of the lobby (Player 1)
+    if (isCreator) {
       player1 = new Person(playerName);
       player1.type = 'human';
       player1.color = 'red';
@@ -749,7 +683,7 @@ document.addEventListener("DOMContentLoaded", function () {
       player2.type = 'remote';
       player2.color = 'yellow';
 
-      currentPlayer = player1; // Lobby creator starts first
+      currentPlayer = player1; 
 
     } else {
       player1 = new Person(opponentName);
@@ -759,7 +693,7 @@ document.addEventListener("DOMContentLoaded", function () {
       player2 = new Person(playerName);
       player2.type = 'human';
       player2.color = 'yellow';
-      // It's the opponent's turn first
+
       currentPlayer = player1; 
     }
 
@@ -773,7 +707,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     playOnlineButton.style.display = "none";
     playGameButton.style.display = "none";
-    quitButton.style.display = "block"; 
+    quitButton.style.display = "block";
 
     for (let r = 0; r < board.rows; r++) {
       for (let c = 0; c < board.cols; c++) {
@@ -799,38 +733,30 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    // Identify the remote player
     let remotePlayer = player1.type === 'remote' ? player1 : player2;
 
-    // Place the piece using the remote player's color
     const placedCell = board.placePiece(col, remotePlayer.color);
 
-    // Extract row and col from the placedCell
     const { row, col: placedCol } = placedCell;
 
-    // Update the UI to reflect the placed piece
     const cellElement = document.querySelector(`.cell[data-row='${row}'][data-col='${placedCol}']`);
     cellElement.classList.remove("hover-player1", "hover-player2");
     cellElement.classList.add(remotePlayer === player1 ? "player1" : "player2");
 
-    // Check if the current move results in a win
     const winningDiscs = Rules.checkWin(board, remotePlayer.color, row, placedCol);
 
     if (winningDiscs) {
-      // If the remote player wins, update the display
       statusDisplay.textContent = `${remotePlayer.name} wins!`;
 
-      // Highlight the winning cells
       winningDiscs.forEach(disc => {
         const winningCellElement = document.querySelector(`.cell[data-row='${disc.row}'][data-col='${disc.col}']`);
         winningCellElement.classList.add("blink");
       });
 
-      gameActive = false;  // Disable game after a win
+      gameActive = false;  
       return;
     }
 
-    // Check for a draw
     if (Rules.checkDraw(board)) {
       statusDisplay.textContent = "It's a draw!";
       gameActive = false;
