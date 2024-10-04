@@ -123,8 +123,13 @@ document.addEventListener("DOMContentLoaded", function () {
   // Replay button
   replayButton.addEventListener("click", async function () {
     if (isOnlineGame) {
-      Network.send(JSON.stringify({ type: 'reset' })); // Reset game for opponent
-      resetOnlineGame();
+      // Toggle a 'swapRoles' flag
+      let swapRoles = sessionStorage.getItem('swapRoles') === 'true' ? false : true;
+      sessionStorage.setItem('swapRoles', swapRoles);
+
+      Network.send(JSON.stringify({ type: 'reset', swap: swapRoles })); // Reset game for opponent and indicate swapping roles
+
+      resetOnlineGame(swapRoles); // Reset the game
     } else {
       resetGame();
       if (currentPlayer.type === 'ai') {
@@ -186,25 +191,51 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Quit button
-  quitButton.addEventListener("click", function () {
-    gameActive = false;
-    board = new Board();
-    renderBoard();
+  quitButton.addEventListener("click", async function () {
+    if (isOnlineGame) {
+      // Send 'quit' message to opponent
+      const playerName = sessionStorage.getItem('playerName') || 'Player';
+      await Network.send(JSON.stringify({ type: 'quit', playerName: playerName }));
+      // Close the network connection
+      Network.closeConnection();
 
-    player1Score = 0;
-    player2Score = 0;
-    gameState = '';
+      // Reset variables
+      gameActive = false;
+      isOnlineGame = false;
 
-    player1ScoreDisplay.textContent = player1Score;
-    player2ScoreDisplay.textContent = player2Score;
+      // Hide UI elements
+      playGameButton.style.display = "block";
+      playOnlineButton.style.display = "block";
+      replayButton.style.display = "none";
+      quitButton.style.display = "none";
+      statusDisplay.style.display = "none";
 
-    playGameButton.style.display = "block";
-    playOnlineButton.style.display = "block";
-    replayButton.style.display = "none";
-    quitButton.style.display = "none";
-    statusDisplay.style.display = "none";
+      document.querySelector('.scoreboard').style.display = 'none';
 
-    document.querySelector('.scoreboard').style.display = 'none';
+      // Clear board
+      board = new Board();
+      renderBoard();
+    } else {
+      // Original code
+      gameActive = false;
+      board = new Board();
+      renderBoard();
+
+      player1Score = 0;
+      player2Score = 0;
+      gameState = '';
+
+      player1ScoreDisplay.textContent = player1Score;
+      player2ScoreDisplay.textContent = player2Score;
+
+      playGameButton.style.display = "block";
+      playOnlineButton.style.display = "block";
+      replayButton.style.display = "none";
+      quitButton.style.display = "none";
+      statusDisplay.style.display = "none";
+
+      document.querySelector('.scoreboard').style.display = 'none';
+    }
   });
 
   // Handle moves in board
@@ -220,11 +251,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (event) {
       col = parseInt(event.target.dataset.col);
     } else if (currentPlayer.type === 'ai') {
-      if (!gameActive) return; 
+      if (!gameActive) return;
       // For AI players
       col = await currentPlayer.makeBotMove();
     } else if (currentPlayer.type === 'external') {
-      if (!gameActive) return; 
+      if (!gameActive) return;
       // Handle external AI move
       col = await currentPlayer.getMoveFromExternalAI(board);
     } else {
@@ -433,22 +464,85 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function resetOnlineGame() {
-    board = new Board();
+  function resetOnlineGame(swapRoles) {
     gameActive = true;
+    isOnlineGame = true; // Indicate online play
+
+    // Determine player roles based on session data and swapRoles flag
+    const code = sessionStorage.getItem('code');
+    const userId = sessionStorage.getItem('userId');
+    const playerName = sessionStorage.getItem('playerName') || 'You';
+    const opponentName = sessionStorage.getItem('opponentName') || 'Opponent';
+
+    board = new Board();
     renderBoard();
 
-    player1Score = 0;
-    player2Score = 0;
-    gameState = '';
+    if (code) {
+      // Creator of the lobby
+      if (swapRoles === 'true' || swapRoles === true) {
+        // Swap roles
+        player1 = new Person(opponentName);
+        player1.type = 'remote';
+        player1.color = 'red';
 
-    player1ScoreDisplay.textContent = player1Score;
-    player2ScoreDisplay.textContent = player2Score;
+        player2 = new Person(playerName);
+        player2.type = 'human';
+        player2.color = 'yellow';
 
-    replayButton.style.display = "none";
+        currentPlayer = player1; // Opponent starts
+
+      } else {
+        // Original roles
+        player1 = new Person(playerName);
+        player1.type = 'human';
+        player1.color = 'red';
+
+        player2 = new Person(opponentName);
+        player2.type = 'remote';
+        player2.color = 'yellow';
+
+        currentPlayer = player1; // Lobby creator starts
+      }
+
+    } else {
+      // Joined the lobby
+      if (swapRoles === 'true' || swapRoles === true) {
+        // Swap roles
+        player1 = new Person(playerName);
+        player1.type = 'human';
+        player1.color = 'red';
+
+        player2 = new Person(opponentName);
+        player2.type = 'remote';
+        player2.color = 'yellow';
+
+        currentPlayer = player1; // You start
+
+      } else {
+        // Original roles
+        player1 = new Person(opponentName);
+        player1.type = 'remote';
+        player1.color = 'red';
+
+        player2 = new Person(playerName);
+        player2.type = 'human';
+        player2.color = 'yellow';
+
+        currentPlayer = player1; // Opponent starts
+      }
+    }
+
+    player1NameDisplay.textContent = player1.name;
+    player2NameDisplay.textContent = player2.name;
+
+    statusDisplay.style.display = "block";
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
 
-    // Add event listeners for new game moves
+    document.querySelector('.scoreboard').style.display = 'flex';
+
+    replayButton.style.display = "none";
+
+    // Add event listeners for local player's moves
     for (let r = 0; r < board.rows; r++) {
       for (let c = 0; c < board.cols; c++) {
         const cell = document.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);
@@ -464,6 +558,7 @@ document.addEventListener("DOMContentLoaded", function () {
       disableClicks();
     }
   }
+
   // Online Play Functions
 
   playOnlineButton.addEventListener("click", function () {
@@ -596,13 +691,44 @@ document.addEventListener("DOMContentLoaded", function () {
       handleRemoteMove(col);
     } else if (parsedData.type === 'reset') {
       // Handle reset from the other player
-      resetOnlineGame(); // Reset the game state for the opponent
+      let swapRoles = parsedData.swap;
+
+      // Update swapRoles in sessionStorage
+      sessionStorage.setItem('swapRoles', swapRoles);
+
+      resetOnlineGame(swapRoles); // Reset the game state for the opponent
+    } else if (parsedData.type === 'quit') {
+      // Opponent has quit the game
+      let playerName = parsedData.playerName || 'Opponent';
+      alert(`${playerName} left the game.`);
+      // Perform cleanup
+      gameActive = false;
+      isOnlineGame = false;
+
+      // Close the network connection
+      Network.closeConnection();
+
+      // Reset UI
+      playGameButton.style.display = "block";
+      playOnlineButton.style.display = "block";
+      replayButton.style.display = "none";
+      quitButton.style.display = "none";
+      statusDisplay.style.display = "none";
+
+      document.querySelector('.scoreboard').style.display = 'none';
+
+      // Clear board
+      board = new Board();
+      renderBoard();
     }
   }
 
   function startOnlineGame() {
     gameActive = true;
     isOnlineGame = true; // Indicate online play
+
+    // Initialize swapRoles
+    sessionStorage.setItem('swapRoles', false);
 
     // Determine player roles based on session data
     const code = sessionStorage.getItem('code');
@@ -626,7 +752,6 @@ document.addEventListener("DOMContentLoaded", function () {
       currentPlayer = player1; // Lobby creator starts first
 
     } else {
-      // Joined the lobby (Player 2)
       player1 = new Person(opponentName);
       player1.type = 'remote';
       player1.color = 'red';
@@ -634,8 +759,8 @@ document.addEventListener("DOMContentLoaded", function () {
       player2 = new Person(playerName);
       player2.type = 'human';
       player2.color = 'yellow';
-
-      currentPlayer = player1; // It's the opponent's turn first
+      // It's the opponent's turn first
+      currentPlayer = player1; 
     }
 
     player1NameDisplay.textContent = player1.name;
@@ -648,7 +773,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     playOnlineButton.style.display = "none";
     playGameButton.style.display = "none";
-    // Add event listeners for local player's moves
+    quitButton.style.display = "block"; 
+
     for (let r = 0; r < board.rows; r++) {
       for (let c = 0; c < board.cols; c++) {
         const cell = document.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);

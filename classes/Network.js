@@ -1,5 +1,6 @@
 let urlPrefix = 'https://sse.nodehill.com';
 let token, listener;
+let eventSource; // Move eventSource to class scope
 
 export default class Network {
 
@@ -9,7 +10,7 @@ export default class Network {
 
     const user = _user, channel = _channel;
 
-    const eventSource = new EventSource(urlPrefix + `/api/listen/${channel}/${user}/0`);
+    eventSource = new EventSource(urlPrefix + `/api/listen/${channel}/${user}/0`);
 
     eventSource.addEventListener('token', event => {
       token = JSON.parse(event.data);
@@ -20,6 +21,12 @@ export default class Network {
     }
 
     eventSource.onerror = error => {
+      eventSource.close();
+    }
+  }
+
+  static closeConnection() {
+    if (eventSource) {
       eventSource.close();
     }
   }
