@@ -128,10 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       resetOnlineGame(swapRoles); 
     } else {
-      resetGame();
-      if (currentPlayer.type === 'ai') {
-        await handleMove();
-      }
+      await resetGame();
     }
   });
 
@@ -142,6 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Start game button
   startGameButton.addEventListener("click", async function () {
+    gameState = ''; // Reset gameState
     const player1Type = player1TypeSelect.value;
     const player2Type = player2TypeSelect.value;
 
@@ -153,7 +151,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Create player1
     player1 = valuetypes(player1Type, board, player1NameInput, null, player1Color);
-    player1.color = player1Color; 
 
     // Create player2
     if (player2Type === 'external') {
@@ -162,7 +159,6 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       player2 = valuetypes(player2Type, board, player2NameInput, null, player2Color);
     }
-    player2.color = player2Color; 
 
     if (player1.name === player2.name) {
       player2.name = player2.name + ' 2';
@@ -178,11 +174,7 @@ document.addEventListener("DOMContentLoaded", function () {
     quitButton.style.display = "block";
     playOnlineButton.style.display = "none";
 
-    startGame();
-
-    if (currentPlayer.type === 'ai') {
-      await handleMove();
-    }
+    await startGame();
   });
 
   // Quit button
@@ -239,35 +231,38 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     let col;
-    if (event) {
-      col = parseInt(event.target.dataset.col);
-    } else if (currentPlayer.type === 'ai') {
-      if (!gameActive) return;
-      // For AI players
-      col = await currentPlayer.makeBotMove();
-    } else if (currentPlayer.type === 'external') {
-      if (!gameActive) return;
-      // Handle external AI move
-      col = await currentPlayer.getMoveFromExternalAI(board);
-    } else {
-      // Should not happen, but handle the case where move method is not available
-      console.error("currentPlayer does not have a valid move method.");
-      return;
+    player1.color = 'red';
+    player2.color = 'yellow';
+
+    switch (currentPlayer.type) {
+      case 'human':
+        col = parseInt(event.target.dataset.col);
+        break;
+      case 'external':
+        col = await currentPlayer.getMoveFromExternalAI(gameState);
+        break;
+      case 'ai':
+        col = await currentPlayer.makeBotMove();
+        break;
     }
 
     if (!gameActive) return;
+
     // Check if the selected column is full
     if (board.isColumnFull(col)) {
       if (currentPlayer.type === 'human') {
         columnFullModal.style.display = 'flex';
+        enableClicks();
       }
-      enableClicks();
       return;
     }
 
     disableClicks();
 
     const placedCell = board.placePiece(col, currentPlayer.color);
+
+    // Update gameState
+    gameState += (col + 1).toString();
 
     const { row, col: placedCol } = placedCell;
 
@@ -331,22 +326,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (currentPlayer.type === 'human') {
       enableClicks();
-    } else if (currentPlayer.type === 'ai' || currentPlayer.type === 'external') {
+    } else if ((currentPlayer.type === 'ai' || currentPlayer.type === 'external') && gameActive && !((player1.type === 'ai' || player1.type === 'external') && (player2.type === 'ai' || player2.type === 'external'))) {
       await handleMove();
-    } else {
-      disableClicks();
     }
   }
 
-  function startGame() {
+  async function startGame() {
     gameActive = true;
     isOnlineGame = false; 
     currentPlayer = player1;
-    enableClicks();
     statusDisplay.style.display = "block";
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
 
-    board = new Board(); 
     renderBoard();
 
     for (let r = 0; r < board.rows; r++) {
@@ -356,6 +347,17 @@ document.addEventListener("DOMContentLoaded", function () {
         cell.addEventListener("mouseout", removeHover);
         cell.addEventListener("click", handleMove);
       }
+    }
+
+    if ((player1.type === 'ai' || player1.type === 'external') && (player2.type === 'ai' || player2.type === 'external')) {
+      disableClicks();
+      await loopUntilGameEnds();
+    } else if ((currentPlayer.type === 'ai' || currentPlayer.type === 'external') && gameActive) {
+
+      disableClicks();
+      await handleMove();
+    } else {
+      enableClicks();
     }
   }
 
@@ -412,18 +414,22 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function resetGame() {
+  async function resetGame() {
     board = new Board();
 
     gameActive = true;
-    enableClicks();
 
-    // Update AI players' board references
-    if (player1.type === 'ai' || player1.type === 'external') {
-      player1.board = board; 
+    if (player1.type === 'ai') {
+      player1 = ai(player1.level, board, 'red');
     }
-    if (player2.type === 'ai' || player2.type === 'external') {
-      player2.board = board; 
+    if (player2.type === 'ai') {
+      player2 = ai(player2.level, board, 'yellow');
+    }
+    if (player1.type === 'external') {
+      player1 = external(player1.level, 'red');
+    }
+    if (player2.type === 'external') {
+      player2 = external(player2.level, 'yellow');
     }
 
     currentPlayer = player1;
@@ -443,92 +449,20 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    // Start the game if the AI is supposed to make the first move
-    if (currentPlayer.type === 'ai' || currentPlayer.type === 'external') {
-      handleMove();
+    if ((player1.type === 'ai' || player1.type === 'external') && (player2.type === 'ai' || player2.type === 'external')) {
+      disableClicks();
+      await loopUntilGameEnds();
+    } else if ((currentPlayer.type === 'ai' || currentPlayer.type === 'external') && gameActive) {
+      disableClicks();
+      await handleMove();
+    } else {
+      enableClicks();
     }
   }
 
-  function resetOnlineGame(swapRoles) {
-    gameActive = true;
-    isOnlineGame = true; 
-
-    board = new Board();
-    renderBoard();
-
-    if (isCreator) {
-      if (swapRoles) {
-        // Swap roles
-        player1 = new Person(opponentName);
-        player1.type = 'remote';
-        player1.color = 'red';
-
-        player2 = new Person(playerName);
-        player2.type = 'human';
-        player2.color = 'yellow';
-
-        currentPlayer = player1; 
-
-      } else {
-        player1 = new Person(playerName);
-        player1.type = 'human';
-        player1.color = 'red';
-
-        player2 = new Person(opponentName);
-        player2.type = 'remote';
-        player2.color = 'yellow';
-        currentPlayer = player1; 
-      }
-
-    } else {
-      if (swapRoles) {
-
-        player1 = new Person(playerName);
-        player1.type = 'human';
-        player1.color = 'red';
-
-        player2 = new Person(opponentName);
-        player2.type = 'remote';
-        player2.color = 'yellow';
-
-        currentPlayer = player1; 
-      } else {
-        player1 = new Person(opponentName);
-        player1.type = 'remote';
-        player1.color = 'red';
-
-        player2 = new Person(playerName);
-        player2.type = 'human';
-        player2.color = 'yellow';
-
-        currentPlayer = player1; 
-      }
-    }
-
-    player1NameDisplay.textContent = player1.name;
-    player2NameDisplay.textContent = player2.name;
-
-    statusDisplay.style.display = "block";
-    statusDisplay.textContent = `${currentPlayer.name}'s turn`;
-
-    document.querySelector('.scoreboard').style.display = 'flex';
-
-    replayButton.style.display = "none";
-
-    // Add event listeners for local player's moves
-    for (let r = 0; r < board.rows; r++) {
-      for (let c = 0; c < board.cols; c++) {
-        const cell = document.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);
-        cell.addEventListener("mouseover", handleHover);
-        cell.addEventListener("mouseout", removeHover);
-        cell.addEventListener("click", handleMove);
-      }
-    }
-
-    if (currentPlayer.type === 'human') {
-      enableClicks();
-    } else {
-      disableClicks();
+  async function loopUntilGameEnds() {
+    while (gameActive) {
+      await handleMove();
     }
   }
 
@@ -725,6 +659,89 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  function resetOnlineGame(swapRoles) {
+    gameActive = true;
+    isOnlineGame = true;
+
+    board = new Board();
+    renderBoard();
+
+    if (isCreator) {
+      if (swapRoles) {
+        // Swap roles
+        player1 = new Person(opponentName);
+        player1.type = 'remote';
+        player1.color = 'red';
+
+        player2 = new Person(playerName);
+        player2.type = 'human';
+        player2.color = 'yellow';
+
+        currentPlayer = player1;
+
+      } else {
+        player1 = new Person(playerName);
+        player1.type = 'human';
+        player1.color = 'red';
+
+        player2 = new Person(opponentName);
+        player2.type = 'remote';
+        player2.color = 'yellow';
+        currentPlayer = player1;
+      }
+
+    } else {
+      if (swapRoles) {
+
+        player1 = new Person(playerName);
+        player1.type = 'human';
+        player1.color = 'red';
+
+        player2 = new Person(opponentName);
+        player2.type = 'remote';
+        player2.color = 'yellow';
+
+        currentPlayer = player1;
+      } else {
+        player1 = new Person(opponentName);
+        player1.type = 'remote';
+        player1.color = 'red';
+
+        player2 = new Person(playerName);
+        player2.type = 'human';
+        player2.color = 'yellow';
+
+        currentPlayer = player1;
+      }
+    }
+
+    player1NameDisplay.textContent = player1.name;
+    player2NameDisplay.textContent = player2.name;
+
+    statusDisplay.style.display = "block";
+    statusDisplay.textContent = `${currentPlayer.name}'s turn`;
+
+    document.querySelector('.scoreboard').style.display = 'flex';
+
+    replayButton.style.display = "none";
+
+    // Add event listeners for local player's moves
+    for (let r = 0; r < board.rows; r++) {
+      for (let c = 0; c < board.cols; c++) {
+        const cell = document.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);
+        cell.addEventListener("mouseover", handleHover);
+        cell.addEventListener("mouseout", removeHover);
+        cell.addEventListener("click", handleMove);
+      }
+    }
+
+    if (currentPlayer.type === 'human') {
+      enableClicks();
+    } else {
+      disableClicks();
+    }
+  }
+
   function handleRemoteMove(col) {
     if (!gameActive) return;
 
@@ -773,5 +790,4 @@ document.addEventListener("DOMContentLoaded", function () {
       disableClicks();
     }
   }
-
 });
