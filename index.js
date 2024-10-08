@@ -745,22 +745,8 @@ document.addEventListener("DOMContentLoaded", function () {
   // Quit Lobby Button Functionality
   quitLobbyButton.addEventListener("click", function () {
     if (isOnlineGame) {
-      const playerNameQuit = playerName || 'Player';
-      Network.send(JSON.stringify({ type: 'quit', playerName: playerNameQuit }));
       Network.closeConnection();
     }
-
-    onlineModal.style.display = "none";
-    playGameButton.style.display = "block";
-    playOnlineButton.style.display = "block";
-
-    isOnlineGame = false;
-    userId = null;
-    code = null;
-    playerName = null;
-    opponentName = null;
-
     onlineModal.style.display = "none";
   });
-
 });
