@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const playerModal = document.getElementById("playerModal");
   const replayButton = document.getElementById("replay-game");
   const quitButton = document.getElementById("quit-game");
+  const quitLobbyButton = document.getElementById("quitLobbyButton");
   const statusDisplay = document.getElementById("status");
   const boardElement = document.getElementById("board");
   const player1NameDisplay = document.getElementById("player1Name");
@@ -88,8 +89,8 @@ document.addEventListener("DOMContentLoaded", function () {
   let code;
   let playerName;
   let opponentName;
-  let swapRoles = false; // Swap roles when Play Again // 
-  let isCreator; 
+  let swapRoles = false; // Swap roles when Play Again
+  let isCreator;
 
   renderBoard();
 
@@ -123,9 +124,6 @@ document.addEventListener("DOMContentLoaded", function () {
   replayButton.addEventListener("click", async function () {
     if (isOnlineGame) {
       swapRoles = !swapRoles;
-      Network.send(JSON.stringify({ type: 'reset', swap: swapRoles })); 
-      Network.send(JSON.stringify({ type: 'reset', swap: swapRoles })); 
-
       Network.send(JSON.stringify({ type: 'reset', swap: swapRoles }));
 
       resetOnlineGame(swapRoles);
@@ -617,9 +615,6 @@ document.addEventListener("DOMContentLoaded", function () {
       player2.type = 'remote';
       player2.color = 'yellow';
 
-      currentPlayer = player1; 
-      currentPlayer = player1; 
-
       currentPlayer = player1;
 
     } else {
@@ -746,4 +741,26 @@ document.addEventListener("DOMContentLoaded", function () {
       disableClicks();
     }
   }
+
+  // Quit Lobby Button Functionality
+  quitLobbyButton.addEventListener("click", function () {
+    if (isOnlineGame) {
+      const playerNameQuit = playerName || 'Player';
+      Network.send(JSON.stringify({ type: 'quit', playerName: playerNameQuit }));
+      Network.closeConnection();
+    }
+
+    onlineModal.style.display = "none";
+    playGameButton.style.display = "block";
+    playOnlineButton.style.display = "block";
+
+    isOnlineGame = false;
+    userId = null;
+    code = null;
+    playerName = null;
+    opponentName = null;
+
+    onlineModal.style.display = "none";
+  });
+
 });
