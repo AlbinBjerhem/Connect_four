@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let player1Score = 0;
   let player2Score = 0;
   let gameState = '';
-  let isOnlineGame = false; 
+  let isOnlineGame = false;
   let userId;
   let code;
   let playerName;
@@ -123,10 +123,12 @@ document.addEventListener("DOMContentLoaded", function () {
   replayButton.addEventListener("click", async function () {
     if (isOnlineGame) {
       swapRoles = !swapRoles;
-
+      Network.send(JSON.stringify({ type: 'reset', swap: swapRoles })); 
       Network.send(JSON.stringify({ type: 'reset', swap: swapRoles })); 
 
-      resetOnlineGame(swapRoles); 
+      Network.send(JSON.stringify({ type: 'reset', swap: swapRoles }));
+
+      resetOnlineGame(swapRoles);
     } else {
       await resetGame();
     }
@@ -184,7 +186,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const playerNameQuit = playerName || 'Player';
       await Network.send(JSON.stringify({ type: 'quit', playerName: playerNameQuit }));
       Network.closeConnection();
-
       gameActive = false;
       isOnlineGame = false;
 
@@ -196,7 +197,6 @@ document.addEventListener("DOMContentLoaded", function () {
       statusDisplay.style.display = "none";
 
       document.querySelector('.scoreboard').style.display = 'none';
-
       board = new Board();
       renderBoard();
     } else {
@@ -223,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Handle moves in board
   async function handleMove(event) {
-    if (!gameActive) return;  
+    if (!gameActive) return;
 
     if (isOnlineGame && currentPlayer.type !== 'human') {
       console.warn("Not your turn!");
@@ -281,28 +281,14 @@ document.addEventListener("DOMContentLoaded", function () {
         winningCellElement.classList.add("blink");
       });
 
-      if (!isOnlineGame) {
-        if (currentPlayer === player1) {
-          player1Score++;
-          player1ScoreDisplay.textContent = player1Score;
-        } else {
-          player2Score++;
-          player2ScoreDisplay.textContent = player2Score;
-        }
-      }
-
-      gameActive = false;  // Disable game after a win
+      gameActive = false;
       replayButton.style.display = "block";
 
-      // Send the move and game over notification to the opponent
-      if (isOnlineGame && currentPlayer.type === 'human') {
-        Network.send(JSON.stringify({ type: 'move', col: col, gameOver: true, winner: currentPlayer.name }));
-      }
+      handleWin(currentPlayer.name);
 
       return;
     }
 
-    // Check for a draw
     if (Rules.checkDraw(board)) {
       statusDisplay.textContent = "It's a draw!";
       gameActive = false;
@@ -331,10 +317,40 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  function updateScoreboard() {
+    player1ScoreDisplay.textContent = player1Score;
+    player2ScoreDisplay.textContent = player2Score;
+  }
+
+  function handleWin(winner) {
+    console.log("Winner:", winner);
+    console.log("Player1:", player1.name);
+    console.log("Player2:", player2.name);
+
+    if (winner === player1.name) {
+      player1Score++;
+    } else if (winner === player2.name) {
+      player2Score++;
+    }
+
+    updateScoreboard();
+
+    if (isOnlineGame) {
+      Network.send(JSON.stringify({
+        type: 'gameResult',
+        player1Score: player1Score,
+        player2Score: player2Score,
+        winner: winner
+      }));
+    }
+  }
+
   async function startGame() {
     gameActive = true;
-    isOnlineGame = false; 
-    currentPlayer = player1;
+    isOnlineGame = false;
+
+    currentPlayer = swapRoles ? player2 : player1;
+
     statusDisplay.style.display = "block";
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
 
@@ -353,7 +369,6 @@ document.addEventListener("DOMContentLoaded", function () {
       disableClicks();
       await loopUntilGameEnds();
     } else if ((currentPlayer.type === 'ai' || currentPlayer.type === 'external') && gameActive) {
-
       disableClicks();
       await handleMove();
     } else {
@@ -419,20 +434,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     gameActive = true;
 
-    if (player1.type === 'ai') {
-      player1 = ai(player1.level, board, 'red');
-    }
-    if (player2.type === 'ai') {
-      player2 = ai(player2.level, board, 'yellow');
-    }
-    if (player1.type === 'external') {
-      player1 = external(player1.level, 'red');
-    }
-    if (player2.type === 'external') {
-      player2 = external(player2.level, 'yellow');
-    }
+    currentPlayer = swapRoles ? player2 : player1;
 
-    currentPlayer = player1;
     statusDisplay.textContent = `${currentPlayer.name}'s turn`;
     gameState = '';
 
@@ -500,7 +503,7 @@ document.addEventListener("DOMContentLoaded", function () {
     userId = Math.random().toString(36).substr(2, 9);
     Network.startConnection(userId, code, networkListener);
 
-    isCreator = true; 
+    isCreator = true;
 
     // Set player1 name
     player1NameDisplay.textContent = playerName;
@@ -526,11 +529,11 @@ document.addEventListener("DOMContentLoaded", function () {
       userId = Math.random().toString(36).substr(2, 9);
       Network.startConnection(userId, code, networkListener);
 
-      isCreator = false; 
+      isCreator = false;
 
       setTimeout(() => {
         Network.send(JSON.stringify({ type: 'join', userId: userId, playerName: playerName }));
-      }, 1000); 
+      }, 1000);
 
     } else {
       alert("Please enter a valid code.");
@@ -558,31 +561,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (parsedData.type === 'join') {
       opponentName = parsedData.playerName || 'Opponent';
-
       Network.send(JSON.stringify({ type: 'start', playerName: playerName }));
-
       onlineModal.style.display = "none";
       startOnlineGame();
-
     } else if (parsedData.type === 'start') {
       opponentName = parsedData.playerName || 'Opponent';
       onlineModal.style.display = "none";
       startOnlineGame();
-
     } else if (parsedData.type === 'move') {
       const col = parsedData.col;
       handleRemoteMove(col);
     } else if (parsedData.type === 'reset') {
       swapRoles = parsedData.swap;
-
-      resetOnlineGame(swapRoles); 
+      resetOnlineGame(swapRoles);
     } else if (parsedData.type === 'quit') {
       // Opponent has quit the game
       let playerNameQuit = parsedData.playerName || 'Opponent';
       alert(`${playerNameQuit} left the game.`);
       gameActive = false;
       isOnlineGame = false;
-
       Network.closeConnection();
 
       // Reset UI
@@ -591,11 +588,14 @@ document.addEventListener("DOMContentLoaded", function () {
       replayButton.style.display = "none";
       quitButton.style.display = "none";
       statusDisplay.style.display = "none";
-
       document.querySelector('.scoreboard').style.display = 'none';
-
       board = new Board();
       renderBoard();
+    } else if (parsedData.type === 'gameResult') {
+      player1Score = parsedData.player1Score;
+      player2Score = parsedData.player2Score;
+      updateScoreboard();
+      statusDisplay.textContent = `${parsedData.winner} wins!`;
     }
   }
 
@@ -618,6 +618,9 @@ document.addEventListener("DOMContentLoaded", function () {
       player2.color = 'yellow';
 
       currentPlayer = player1; 
+      currentPlayer = player1; 
+
+      currentPlayer = player1;
 
     } else {
       player1 = new Person(opponentName);
@@ -628,7 +631,7 @@ document.addEventListener("DOMContentLoaded", function () {
       player2.type = 'human';
       player2.color = 'yellow';
 
-      currentPlayer = player1; 
+      currentPlayer = player1;
     }
 
     player1NameDisplay.textContent = player1.name;
@@ -666,54 +669,7 @@ document.addEventListener("DOMContentLoaded", function () {
     board = new Board();
     renderBoard();
 
-    if (isCreator) {
-      if (swapRoles) {
-        // Swap roles
-        player1 = new Person(opponentName);
-        player1.type = 'remote';
-        player1.color = 'red';
-
-        player2 = new Person(playerName);
-        player2.type = 'human';
-        player2.color = 'yellow';
-
-        currentPlayer = player1;
-
-      } else {
-        player1 = new Person(playerName);
-        player1.type = 'human';
-        player1.color = 'red';
-
-        player2 = new Person(opponentName);
-        player2.type = 'remote';
-        player2.color = 'yellow';
-        currentPlayer = player1;
-      }
-
-    } else {
-      if (swapRoles) {
-
-        player1 = new Person(playerName);
-        player1.type = 'human';
-        player1.color = 'red';
-
-        player2 = new Person(opponentName);
-        player2.type = 'remote';
-        player2.color = 'yellow';
-
-        currentPlayer = player1;
-      } else {
-        player1 = new Person(opponentName);
-        player1.type = 'remote';
-        player1.color = 'red';
-
-        player2 = new Person(playerName);
-        player2.type = 'human';
-        player2.color = 'yellow';
-
-        currentPlayer = player1;
-      }
-    }
+    currentPlayer = swapRoles ? player2 : player1;
 
     player1NameDisplay.textContent = player1.name;
     player2NameDisplay.textContent = player2.name;
@@ -770,7 +726,7 @@ document.addEventListener("DOMContentLoaded", function () {
         winningCellElement.classList.add("blink");
       });
 
-      gameActive = false;  
+      gameActive = false;
       return;
     }
 
