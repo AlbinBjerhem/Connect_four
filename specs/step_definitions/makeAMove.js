@@ -1,26 +1,42 @@
 import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
-import { clickCell } from './commonSteps'; // Ensure to import the clickCell function
+import { clickCell } from './commonSteps.js';
 
-// Step to click on the first column in the board game
-When('the user clicks on the 1st column in the board game', () => {
-  clickCell('iframe#player1', 0, 5, "Player 1's turn", "Player 2's turn");
+When('Player 1 clicks on a cell', () => {
+  clickCell('iframe#player1', 0, 5, "Player 1's turn", "Player 2's turn", 'player1');
 });
 
-// Step for the second user clicking on the 5th column
-When('the second user clicks on the 5th column', () => {
-  clickCell('iframe#player2', 4, 5, "Player 2's turn", "Player 1's turn");
+Then('the cell should reflect Player 1\'s move', () => {
+  cy.get('iframe#player1').then($iframe => {
+    const player1Body = $iframe.contents().find('body');
+    cy.wrap(player1Body)
+      .find(`.cell[data-row="5"][data-col="0"]`)
+      .should('have.class', 'player1');
+  });
 });
 
-// Step to check if the cell is filled
-Then('the cell in row {string} and column {string} should be {string}', (row, col, expectedClass) => {
-  cy.get(`.cell[data-row="${row}"][data-col="${col}"]`)
-    .should('have.class', 'cell') // Check if it's a valid cell
-    .and('have.class', expectedClass) // Check if it has the expected class (e.g., 'player1', 'player2')
-    .then(($cell) => {
-      // Log the classes of the cell for debugging
-      cy.log(`Cell at row: ${row}, col: ${col} has classes: ${$cell.attr('class')}`);
-    });
+When('Player 2 clicks on a cell', () => {
+  clickCell('iframe#player2', 0, 4, "Player 2's turn", "Player 1's turn", 'player2');
 });
 
+Then('the cell should reflect Player 2\'s move', () => {
+  cy.get('iframe#player2').then($iframe => {
+    const player2Body = $iframe.contents().find('body');
+    cy.wrap(player2Body)
+      .find(`.cell[data-row="4"][data-col="0"]`)
+      .should('have.class', 'player2');
+  });
+});
 
+When('Player 2 attempts to click on the same cell', () => {
+  // Player 2 tries to click on the already occupied cell
+  clickCell('iframe#player2', 0, 5, "Player 2's turn", "Player 1's turn", 'player2');
+});
 
+Then('the cell should still reflect Player 1\'s move', () => {
+  cy.get('iframe#player1').then($iframe => {
+    const player1Body = $iframe.contents().find('body');
+    cy.wrap(player1Body)
+      .find(`.cell[data-row="5"][data-col="0"]`)
+      .should('have.class', 'player1');
+  });
+});

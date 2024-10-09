@@ -1,10 +1,9 @@
 import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 
-// Variable to store the lobby code
-
 let lobbyCode = '';
+export let player1Score = 0;
+export let player2Score = 0;
 
-// Startpage
 Given('that I am on the Connect Four game page', () => {
   cy.visit('http://localhost:5173');
 });
@@ -55,6 +54,14 @@ Given('that an online game is initiated', () => {
       .find('#status', { timeout: 10000 })
       .should('be.visible')
       .and('contain', "Player 1's turn");
+
+    cy.wrap(player1Body).find('.scoreboard #player1Score').invoke('text').then((text) => {
+      player1Score = parseInt(text.trim()) || 0; // Store Player 1's initial score
+    });
+
+    cy.wrap(player1Body).find('.scoreboard #player2Score').invoke('text').then((text) => {
+      player2Score = parseInt(text.trim()) || 0; // Store Player 2's initial score
+    });
   });
 });
 
@@ -67,9 +74,8 @@ export function clickCell(playerIframe, column, row, currentTurn, nextTurn) {
       .should('be.visible')
       .click({ force: true })
       .then(() => {
-        cy.wait(500); // Adjust the wait time as needed
+        cy.wait(500);
 
-        // Check for the next turn
         if (nextTurn !== 'It\'s a draw!') {
           cy.wrap(iframeBody)
             .find('#status', { timeout: 10000 })
@@ -82,7 +88,6 @@ export function clickCell(playerIframe, column, row, currentTurn, nextTurn) {
 // Step to play a full game without a winner
 When('both players play and fill the board without a winner', () => {
 
-  // Simulate the game where the board is filled
 
   // Column 0 
   clickCell('iframe#player1', 0, 5, "Player 1's turn", "Player 2's turn");
