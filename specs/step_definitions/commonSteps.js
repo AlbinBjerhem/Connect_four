@@ -4,6 +4,7 @@ let lobbyCode = '';
 export let player1Score = 0;
 export let player2Score = 0;
 
+
 Given('that I am on the Connect Four game page', () => {
   cy.visit('http://localhost:5173');
 });
