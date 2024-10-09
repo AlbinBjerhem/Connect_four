@@ -1,5 +1,5 @@
 import { Then } from "@badeball/cypress-cucumber-preprocessor";
-import { player1Score, player2Score } from './commonSteps.js';
+import { retrievePlayerScores, player1Score, player2Score } from './commonSteps.js';
 
 // Step to check that the game ends in a draw
 Then('the game should end in a draw', () => {
@@ -12,6 +12,9 @@ Then('the game should end in a draw', () => {
   cy.get('iframe#player2').then($iframe => {
     const player2Body = $iframe.contents().find('body');
     cy.wrap(player2Body).find('#status').should('contain', "It's a draw!").and('be.visible');
+
+    retrievePlayerScores('iframe#player1');
+    retrievePlayerScores('iframe#player2');
   });
 });
 

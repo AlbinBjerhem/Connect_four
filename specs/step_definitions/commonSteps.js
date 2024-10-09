@@ -4,6 +4,20 @@ let lobbyCode = '';
 export let player1Score = 0;
 export let player2Score = 0;
 
+export function retrievePlayerScores(iframeSelector) {
+  cy.get(iframeSelector).then($ifram => {
+    const playerbody = $ifram.contents().find('body');
+
+    cy.wrap(playerbody).find('.scoreboard #player1Score').invoke('text').then((text) => {
+      player1Score = parseInt(text.trim()) || 0;
+    });
+
+    cy.wrap(playerbody).find('.scoreboard #player2Score').invoke('text').then((text) => {
+      player2Score = parseInt(text.trim()) || 0;
+    });
+  })
+}
+
 
 Given('that I am on the Connect Four game page', () => {
   cy.visit('http://localhost:5173');
@@ -56,13 +70,10 @@ Given('that an online game is initiated', () => {
       .should('be.visible')
       .and('contain', "Player 1's turn");
 
-    cy.wrap(player1Body).find('.scoreboard #player1Score').invoke('text').then((text) => {
-      player1Score = parseInt(text.trim()) || 0; // Store Player 1's initial score
-    });
+    retrievePlayerScores('iframe#player1')
+    retrievePlayerScores('iframe#player2')
 
-    cy.wrap(player1Body).find('.scoreboard #player2Score').invoke('text').then((text) => {
-      player2Score = parseInt(text.trim()) || 0; // Store Player 2's initial score
-    });
+
   });
 });
 
@@ -148,3 +159,14 @@ When('both players play and fill the board without a winner', () => {
   clickCell('iframe#player1', 6, 1, "Player 1's turn", "Player 2's turn");
   clickCell('iframe#player2', 6, 0, "Player 2's turn", "It's a draw!");
 });
+
+When('both players play the game and player 1 wins', () => {
+
+  clickCell('iframe#player1', 0, 5, "Player 1's turn", "Player 2's turn");
+  clickCell('iframe#player2', 1, 5, "Player 2's turn", "Player 1's turn");
+  clickCell('iframe#player1', 0, 4, "Player 1's turn", "Player 2's turn");
+  clickCell('iframe#player2', 1, 4, "Player 2's turn", "Player 1's turn");
+  clickCell('iframe#player1', 0, 3, "Player 1's turn", "Player 2's turn");
+  clickCell('iframe#player2', 1, 3, "Player 2's turn", "Player 1's turn");
+  clickCell('iframe#player1', 0, 2, "Player 1's turn", "Player 1 wins!");
+})
