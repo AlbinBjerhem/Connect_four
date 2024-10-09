@@ -39,27 +39,29 @@ Given('that an online game is initiated', () => {
   });
 });
 
+export function clickCell(playerIframe, column, row, currentTurn, nextTurn) {
+  cy.get(playerIframe).then($iframe => {
+    const iframeBody = $iframe.contents().find('body');
+
+    cy.wrap(iframeBody)
+      .find(`.cell[data-col="${column}"][data-row="${row}"]`)
+      .should('be.visible')
+      .click({ force: true })
+      .then(() => {
+        cy.wait(500); // Adjust the wait time as needed
+
+        // Check for the next turn
+        if (nextTurn !== 'It\'s a draw!') {
+          cy.wrap(iframeBody)
+            .find('#status', { timeout: 10000 })
+            .should('contain', nextTurn);
+        }
+      });
+  });
+}
+
 // Step to play a full game without a winner
 When('both players play and fill the board without a winner', () => {
-  function clickCell(playerIframe, column, row, currentTurn, nextTurn) {
-    cy.get(playerIframe).then($iframe => {
-      const iframeBody = $iframe.contents().find('body');
-
-      cy.wrap(iframeBody)
-        .find(`.cell[data-col="${column}"][data-row="${row}"]`)
-        .should('be.visible')
-        .click({ force: true })
-        .then(() => {
-          cy.wait(500);
-
-          if (nextTurn !== 'It\'s a draw!') {
-            cy.wrap(iframeBody)
-              .find('#status', { timeout: 10000 })
-              .should('contain', nextTurn);
-          }
-        });
-    });
-  }
 
   // Simulate the game where the board is filled
 
