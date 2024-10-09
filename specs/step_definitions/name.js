@@ -42,18 +42,6 @@ When('I enter {string} as Player 1 and {string} as Player 2', (player1Name, play
   });
 });
 
-// Start game
-When('I start the game', () => {
-  ['iframe#player1', 'iframe#player2'].forEach((iframeSelector) => {
-    cy.get(iframeSelector).then($iframe => {
-      const iframeBody = $iframe.contents().find('body');
-      cy.wrap(iframeBody)
-        .find('#status', { timeout: 20000 })
-        .should('be.visible');
-    });
-  });
-});
-
 // Place marker in first column
 When('I place a piece in the first column', () => {
   cy.get('iframe#player1').then($iframe => {

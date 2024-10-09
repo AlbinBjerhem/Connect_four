@@ -86,6 +86,18 @@ export function clickCell(playerIframe, column, row, currentTurn, nextTurn) {
   });
 }
 
+// Start game
+When('I start the game', () => {
+  ['iframe#player1', 'iframe#player2'].forEach((iframeSelector) => {
+    cy.get(iframeSelector).then($iframe => {
+      const iframeBody = $iframe.contents().find('body');
+      cy.wrap(iframeBody)
+        .find('#status', { timeout: 20000 })
+        .should('be.visible');
+    });
+  });
+});
+
 // Step to play a full game without a winner
 When('both players play and fill the board without a winner', () => {
 
