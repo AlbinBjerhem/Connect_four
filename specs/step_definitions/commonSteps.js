@@ -1,7 +1,26 @@
-import { Given, When } from "@badeball/cypress-cucumber-preprocessor";
+import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 
 // Variable to store the lobby code
+
 let lobbyCode = '';
+
+// Startpage
+Given('that I am on the Connect Four game page', () => {
+  cy.visit('http://localhost:5173');
+});
+
+// Step to check specific text is displayed on screen
+Then('I should see {string} displayed on the screen', (expectedText) => {
+  cy.log('Status displays: ' + expectedText);
+  ['iframe#player1', 'iframe#player2'].forEach((iframeSelector) => {
+    cy.get(iframeSelector).then($iframe => {
+      const iframeBody = $iframe.contents().find('body');
+      cy.wrap(iframeBody)
+        .find('#status', { timeout: 20000 })
+        .should('contain', expectedText);
+    });
+  });
+});
 
 // Step to initiate an online game where Player 1 creates a lobby and Player 2 joins
 Given('that an online game is initiated', () => {
