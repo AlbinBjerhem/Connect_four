@@ -1,1 +1,1 @@
-First
+Our first sprint.
