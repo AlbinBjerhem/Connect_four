@@ -10,14 +10,15 @@ Before you can run the tests, make sure you have the following installed:
 - NPM (Node Package Manager)
 - Vite
 
-## Installation
+### Network Play Enhancements (New in this Sprint)
 
-First, ensure all necessary packages are installed by running the following commands:
+In this sprint, we implemented network play functionality. This allows two players to play against each other online using real-time communication. The network layer handles server-sent events (SSE) to manage real-time updates for each player. The system is designed to:
 
-```node
-npm install vite@latest
-npm install --save-dev @cypress/webpack-preprocessor
-```
+- Establish a connection between two players over a specified channel.
+- Handle game events in real-time, ensuring both players see updates simultaneously.
+- Send and receive game moves, allowing smooth gameplay between two online players.
+  
+Additionally, we have added a network play simulation where two iframes are used to represent the two players' perspectives. This setup allows us to test real-time gameplay interactions and ensure that both players' moves are correctly synchronized across the network.
 
 ## Running the Tests
 
@@ -41,53 +42,65 @@ To run the tests, you'll need to open two terminal windows:
 
 The first terminal will serve the application, while the second will run the test suite against it.
 
-## Test Scenarios Overview
-
-The test scenarios cover various gameplay aspects, including Player vs AI matches, AI vs AI matches, and External AI interactions. Each test is designed to verify that the game behaves as expected during different types of interactions.
-
-### Test Files
-
-#### `testAi.js` / `testAi.feature`
-
-This file contains tests focused on player and AI interactions. Here are the main scenarios:
-
-1. **Player vs Dumb AI**
-   - A player places a piece and waits for the dumb AI to respond.
-   - Validates that the dumb AI can successfully make a move.
-
-2. **Player vs Smart AI**
-   - A player places a piece and waits for the smart AI to respond.
-   - Validates that the smart AI can successfully make a move.
-
-3. **Dumb AI vs Smart AI**
-   - Simulates a game between the dumb AI and the smart AI.
-   - Confirms that both AIs are capable of making valid moves during gameplay.
-
-#### `externalAi.js` / `externalAi.feature`
-
-This file includes tests involving an External AI opponent:
-
-1. **Smart AI vs External AI level 1**
-   - The smart AI plays against an external AI at level 1.
-   - Checks which AI won after the game is finished based on the `div#status`.
-
-2. **Smart AI vs External AI level 5**
-   - The smart AI plays against an external AI at level 1.
-   - Checks which AI won after the game is finished based on the `div#status`.
-
-3. **Smart AI vs External AI level 10**
-   - The smart AI plays against an external AI at level 1.
-   - Checks which AI won after the game is finished based on the scoreboard.
-   - Encountered a bug on whatever the last test was, the `div#status` would go over to who's turn it was.
 
 ### Testing Tools and Methodology
 
 These tests are written using Cypress and leverage feature files for Behavior-Driven Development (BDD). Each scenario describes a specific flow in plain language, making it easy to understand the test purpose.
 
-### Test Purpose
+### Cypress Tests with BDD
 
-- **Player vs AI Tests**: Validate that both dumb and smart AIs react correctly when playing against a human.
-- **AI vs AI Tests**: Ensure AI players can handle matches against each other without errors.
-- **External AI Tests**: Test how well the external AI can perform and conclude games against built-in AI opponents.
+We have incorporated Behavior-Driven Development (BDD) into our Cypress tests. These tests cover various gameplay scenarios, focusing on real-time networked interactions and ensuring that the game performs as expected in online multiplayer settings.
+
+#### Player Wins Scenarios
+
+These tests verify that the game correctly handles different win conditions during online play:
+
+- **Player 1 Wins Horizontally**: A game where Player 1 wins by connecting four pieces horizontally.
+  
+- **Player 2 Wins Vertically**: A game where Player 2 wins by connecting four pieces vertically.
+
+- **Player Wins Diagonally**: Scenarios where players win by connecting four pieces diagonally, either from bottom-left to top-right or from top-left to bottom-right.
+
+#### Play Again Functionality
+
+We have added tests to verify that the "Play Again" feature works correctly during online play:
+
+- **Play Again After a Draw**: If the game ends in a draw, the "Play Again" button appears, and pressing it starts a new game.
+  
+- **Play Again With Switched Starting Player**: When a game ends, the starting player switches for the next round, ensuring fairness in subsequent games.
+
+#### Name Registration in Network Play
+
+These tests ensure that player names are correctly registered and displayed during online games:
+
+- **Registering Player Names**: Verifies that when players enter their names, they are displayed correctly during the game.
+
+- **Displaying Winner's Name**: After a game ends, the winning player's name is correctly displayed, and this data is saved.
+
+#### Making a Move
+
+Several tests focus on ensuring that the game correctly handles moves made by each player in real-time:
+
+- **Players Take Turns**: Ensures players alternate turns, and the board reflects their moves during online play.
+
+- **Preventing Moves in Occupied Cells**: Ensures players cannot make a move in a cell that is already occupied by another piece.
+
+#### Simulating a Draw
+
+These tests verify that the game correctly handles a scenario where both players fill the board without any winner, and that the game ends in a draw. The score should remain unchanged after a draw.
+
+#### Test Purpose
+
+- **Network Play Tests**: Validate that two players can play against each other online in real-time, with game moves and updates properly synchronized between the players.
+
+- **Player Wins Scenarios**: Ensure that the game correctly identifies and displays the winner when a player wins by connecting four pieces horizontally, vertically, or diagonally.
+
+- **Play Again Functionality**: Verify that the "Play Again" feature works as expected after a game ends, including starting a new game and switching the starting player for fairness.
+
+- **Name Registration in Network Play**: Ensure that player names are correctly registered, displayed during the game, and updated when a player wins.
+
+- **Making a Move**: Confirm that the game handles moves made by each player in real-time, alternates turns, and prevents moves in already occupied cells.
+
+- **Draw Scenario**: Validate that the game correctly identifies when a match ends in a draw and allows players to start a new game without affecting the score.
 
 
