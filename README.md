@@ -89,7 +89,7 @@ Several tests focus on ensuring that the game correctly handles moves made by ea
 
 These tests verify that the game correctly handles a scenario where both players fill the board without any winner, and that the game ends in a draw. The score should remain unchanged after a draw.
 
-#### Test Purpose
+### Test Purpose
 
 - **Network Play Tests**: Validate that two players can play against each other online in real-time, with game moves and updates properly synchronized between the players.
 
